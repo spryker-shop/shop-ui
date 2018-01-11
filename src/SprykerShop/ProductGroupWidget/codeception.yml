@@ -1,4 +1,4 @@
-namespace: RedirectPage
+namespace: ProductGroupWidget
 actor: Tester
 paths:
     tests: tests
