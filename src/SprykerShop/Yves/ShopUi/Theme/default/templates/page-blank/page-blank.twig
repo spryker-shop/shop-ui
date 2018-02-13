@@ -1,12 +1,12 @@
 {% extends model('template') %}
 
-{% set data = {
+{% define data = {
     locale: app.locale | slice(0, 2),
     title: 'global.spryker.shop' | trans,
     metaTitle: 'global.spryker.shop' | trans,
     metaDescription: '',
     metaKeywords: ''
-} | merge(data | default({})) %}
+} %}
 
 {% block template %}
     {%- if config.debug -%}
@@ -27,13 +27,13 @@
             {% endblock %}
 
             {% block headStyles %}
-                <link rel="stylesheet" href="/assets/css/yves_default.basics.css" />
-                <link rel="stylesheet" href="/assets/css/yves_default.app.css" />
-                <link rel="stylesheet" href="/assets/css/yves_default.utils.css" />
+                <link rel="stylesheet" href="{{publicPath('css/yves_default.basics.css')}}" />
+                <link rel="stylesheet" href="{{publicPath('css/yves_default.app.css')}}" />
+                <link rel="stylesheet" href="{{publicPath('css/yves_default.utils.css')}}" />
             {% endblock %}
 
             {% block headScripts %}
-                <script src="/assets/js/yves_default.manifest.js"></script>
+                <script src="{{publicPath('js/yves_default.manifest.js')}}"></script>
             {% endblock %}
 
             <title>{% block headTitle %}{{ data.title }}{% endblock %}</title>
@@ -45,7 +45,7 @@
             {{block('renderTemplate')}}
 
             {% block footerScripts %}
-                <script src="/assets/js/yves_default.app.js"></script>
+                <script src="{{publicPath('js/yves_default.app.js')}}"></script>
             {% endblock %}
         </body>
     </html>
