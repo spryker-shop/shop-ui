@@ -1,8 +1,8 @@
 {% extends model('component') %}
 
 {% define config = {
-    name: 'class-toggler-selector',
-    tag: 'class-toggler-selector'
+    name: 'toggler-multiselector',
+    tag: 'toggler-multiselector'
 } %}
 
 {% define data = {
@@ -26,7 +26,7 @@
                 })
             }) %}
             
-            <li class="list__item">{% include molecule('class-toggler') with context only %}</li>
+            <li class="list__item">{% include molecule('toggler-radio') with context only %}</li>
         {% endfor %}
     </ul>
 {% endblock %}
