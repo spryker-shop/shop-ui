@@ -5,16 +5,13 @@
  * Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
  */
 
-namespace SprykerShop\Yves\ShopUi\Dependency\Plugin\CompanyWidget;
+namespace SprykerShop\Yves\ShopUi\Dependency\Plugin\AgentWidget;
 
 use Spryker\Yves\Kernel\Dependency\Plugin\WidgetPluginInterface;
 
-/**
- * @deprecated Use \SprykerShop\Yves\CompanyWidget\Widget\CompanyMenuItemWidget instead.
- */
-interface MenuItemCompanyWidgetPluginInterface extends WidgetPluginInterface
+interface AgentWidgetPluginInterface extends WidgetPluginInterface
 {
-    public const NAME = 'MenuItemCompanyWidgetPlugin';
+    public const NAME = 'AgentWidgetPlugin';
 
     /**
      * @api
