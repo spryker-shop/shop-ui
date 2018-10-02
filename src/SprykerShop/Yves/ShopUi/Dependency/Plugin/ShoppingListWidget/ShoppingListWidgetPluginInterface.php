@@ -5,20 +5,18 @@
  * Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
  */
 
-namespace SprykerShop\Yves\ShopUi\Dependency\Plugin\MultiCart;
+namespace SprykerShop\Yves\ShopUi\Dependency\Plugin\ShoppingListWidget;
 
 use Spryker\Yves\Kernel\Dependency\Plugin\WidgetPluginInterface;
 
-interface MiniCartWidgetPluginInterface extends WidgetPluginInterface
+interface ShoppingListWidgetPluginInterface extends WidgetPluginInterface
 {
-    public const NAME = 'MiniCartWidgetPlugin';
+    public const NAME = 'ShoppingListWidgetPlugin';
 
     /**
      * @api
      *
-     * @param int $cartQuantity
-     *
      * @return void
      */
-    public function initialize($cartQuantity): void;
+    public function initialize(): void;
 }
