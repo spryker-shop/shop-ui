@@ -5,16 +5,16 @@
  * Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
  */
 
-namespace SprykerShop\Yves\ShopUi\Dependency\Plugin\CompanyWidget;
+namespace SprykerShop\Yves\ShopUi\Dependency\Plugin\ShoppingListWidget;
 
 use Spryker\Yves\Kernel\Dependency\Plugin\WidgetPluginInterface;
 
 /**
- * @deprecated Use \SprykerShop\Yves\CompanyWidget\Widget\CompanyMenuItemWidget instead.
+ * @deprecated Use \SprykerShop\Yves\ShoppingListWidget\Widget\ShoppingListNavigationMenuWidget instead.
  */
-interface MenuItemCompanyWidgetPluginInterface extends WidgetPluginInterface
+interface ShoppingListWidgetPluginInterface extends WidgetPluginInterface
 {
-    public const NAME = 'MenuItemCompanyWidgetPlugin';
+    public const NAME = 'ShoppingListWidgetPlugin';
 
     /**
      * @api
