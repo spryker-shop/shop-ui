@@ -53,10 +53,10 @@ export default class ClipboardCopy extends Component {
             return;
         }
 
-        this.target.select();
-        document.execCommand('copy');
-        this.showMessage(this.successCopyMessage, this.defaultDuration);
-        this.dispatchCustomEvent(EVENT_COPY);
+        navigator.clipboard.writeText(this.target.value).then(() => {
+            this.showMessage(this.successCopyMessage, this.defaultDuration);
+            this.dispatchCustomEvent(EVENT_COPY);
+        });
     }
 
     /**
@@ -106,7 +106,7 @@ export default class ClipboardCopy extends Component {
      * Gets if a browser supports the automatically copy to clipboard feature.
      */
     get isCopyCommandSupported(): boolean {
-        return document.queryCommandSupported('copy');
+        return navigator.clipboard && window.isSecureContext;
     }
 
     /**
