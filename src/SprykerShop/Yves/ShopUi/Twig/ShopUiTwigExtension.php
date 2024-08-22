@@ -163,8 +163,8 @@ class ShopUiTwigExtension extends TwigExtension
                 'is_variadic' => true,
             ]),
 
-            new TwigFunction(static::FUNCTION_GET_UI_MODEL_COMPONENT_TEMPLATE, function ($modelName) {
-                return $this->getModelTemplate($modelName);
+            new TwigFunction(static::FUNCTION_GET_UI_MODEL_COMPONENT_TEMPLATE, function ($modelName, $modelModule = self::DEFAULT_MODULE) {
+                return $this->getModelTemplate($modelModule, $modelName);
             }, [
                 $this,
                 static::FUNCTION_GET_UI_MODEL_COMPONENT_TEMPLATE,
@@ -257,13 +257,14 @@ class ShopUiTwigExtension extends TwigExtension
     }
 
     /**
+     * @param string $modelModule
      * @param string $modelName
      *
      * @return string
      */
-    protected function getModelTemplate(string $modelName): string
+    protected function getModelTemplate(string $modelModule, string $modelName): string
     {
-        return '@ShopUi/models/' . $modelName . '.twig';
+        return '@' . $modelModule . '/models/' . $modelName . '.twig';
     }
 
     /**
