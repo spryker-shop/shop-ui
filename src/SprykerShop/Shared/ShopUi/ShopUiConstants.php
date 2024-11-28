@@ -24,4 +24,14 @@ interface ShopUiConstants
      * @var string
      */
     public const YVES_ASSETS_URL_PATTERN = 'SHOP_UI:YVES_ASSETS_URL_PATTERN';
+
+    /**
+     * Specification:
+     *  - Returns true if the store routing is enabled.
+     *
+     * @api
+     *
+     * @var string
+     */
+    public const IS_STORE_ROUTING_ENABLED = 'STORAGE_ROUTER:IS_STORE_ROUTING_ENABLED';
 }
