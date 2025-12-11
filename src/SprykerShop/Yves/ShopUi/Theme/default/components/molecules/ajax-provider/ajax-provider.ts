@@ -94,7 +94,7 @@ export default class AjaxProvider extends Component {
                 Object.entries(this.dynamicParams).forEach(([key, params]) => {
                     this.queryParams.delete(key);
                     const selector = document.querySelector(params.selector);
-                    const value = selector?.getAttribute(params.attribute) ?? selector[params.attribute];
+                    const value = selector?.getAttribute(params.attribute) ?? selector?.[params.attribute];
 
                     if (value) {
                         this.queryParams.set(key, value);
