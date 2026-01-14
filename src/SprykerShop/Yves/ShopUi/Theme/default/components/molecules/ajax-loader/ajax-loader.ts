@@ -9,11 +9,12 @@ export default class AjaxLoader extends Component {
 
     protected init(): void {
         this.parent = <HTMLElement>(this.parentClassName ? this.closest(`.${this.parentClassName}`) : document);
-        this.providers = <AjaxProvider[]>Array.from(
-            this.providerClassName
-                ? this.parent.getElementsByClassName(this.providerClassName)
-                : // eslint-disable-next-line deprecation/deprecation
-                  this.parent.querySelectorAll(this.providerSelector),
+        this.providers = <AjaxProvider[]>(
+            Array.from(
+                this.providerClassName
+                    ? this.parent.getElementsByClassName(this.providerClassName)
+                    : this.parent.querySelectorAll(this.providerSelector),
+            )
         );
 
         this.mapEvents();

@@ -17,7 +17,6 @@ export enum LogLevel {
     VERBOSE,
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type LogFunction = (...args: any[]) => void;
 
 let prefix = '';
@@ -31,7 +30,7 @@ const getPrefix = (type: string) => `[${prefix}@${type}]`;
  *
  * @param args List of arguments to log.
  */
-/* eslint-disable @typescript-eslint/no-explicit-any, no-console */
+/* eslint-disable no-console */
 export let debug: LogFunction = (...args: any[]): void => {
     console.debug(getPrefix('debug'), ...args);
 };
@@ -43,7 +42,7 @@ export let debug: LogFunction = (...args: any[]): void => {
  *
  * @param args List of arguments to log.
  */
-/* eslint-disable @typescript-eslint/no-explicit-any, no-console */
+/* eslint-disable no-console */
 export let log: LogFunction = (...args: any[]): void => {
     console.log(getPrefix('log'), ...args);
 };
@@ -55,7 +54,7 @@ export let log: LogFunction = (...args: any[]): void => {
  *
  * @param args List of arguments to log.
  */
-/* eslint-disable @typescript-eslint/no-explicit-any, no-console */
+/* eslint-disable no-console */
 export let info: LogFunction = (...args: any[]): void => {
     console.info(getPrefix('info'), ...args);
 };
@@ -67,7 +66,7 @@ export let info: LogFunction = (...args: any[]): void => {
  *
  * @param args List of arguments to log.
  */
-/* eslint-disable @typescript-eslint/no-explicit-any, no-console */
+/* eslint-disable no-console */
 export let warn: LogFunction = (...args: any[]): void => {
     console.warn(getPrefix('warn'), ...args);
 };
@@ -79,7 +78,7 @@ export let warn: LogFunction = (...args: any[]): void => {
  *
  * @param args List of arguments to log.
  */
-/* eslint-disable @typescript-eslint/no-explicit-any, no-console */
+/* eslint-disable no-console */
 export const error: LogFunction = (...args: any[]): void => {
     console.error(getPrefix('error'), ...args);
 };

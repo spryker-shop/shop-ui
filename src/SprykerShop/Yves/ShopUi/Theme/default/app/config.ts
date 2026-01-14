@@ -24,7 +24,7 @@ export interface Config {
         prefix: string;
         level: LogLevel;
     };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     extra?: any;
 }
 
@@ -40,7 +40,7 @@ export const defaultConfig: Config = {
         /**
          * @deprecated Use events.mount instead.
          */
-        // eslint-disable-next-line deprecation/deprecation
+
         ready: 'components-ready',
         bootstrap: 'application-bootstrap',
         error: 'application-error',

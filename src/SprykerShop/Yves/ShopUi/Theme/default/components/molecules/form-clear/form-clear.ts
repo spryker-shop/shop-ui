@@ -35,21 +35,24 @@ export default class FormClear extends Component {
     formFieldsClearAfter: CustomEvent;
 
     protected readyCallback(): void {
-        this.triggers = <HTMLElement[]>Array.from(
-            this.triggerClassName
-                ? document.getElementsByClassName(this.triggerClassName)
-                : // eslint-disable-next-line deprecation/deprecation
-                  document.querySelectorAll(this.triggerSelector),
+        this.triggers = <HTMLElement[]>(
+            Array.from(
+                this.triggerClassName
+                    ? document.getElementsByClassName(this.triggerClassName)
+                    : document.querySelectorAll(this.triggerSelector),
+            )
         );
-        this.form = <HTMLElement>(this.formClassName
-            ? document.getElementsByClassName(this.formClassName)[0]
-            : // eslint-disable-next-line deprecation/deprecation
-              document.querySelector(this.formSelector));
-        this.ignoreElements = <HTMLElement[]>Array.from(
-            this.ignoreClassName
-                ? this.form.getElementsByClassName(this.ignoreClassName)
-                : // eslint-disable-next-line deprecation/deprecation
-                  this.form.querySelectorAll(this.ignoreSelector),
+        this.form = <HTMLElement>(
+            (this.formClassName
+                ? document.getElementsByClassName(this.formClassName)[0]
+                : document.querySelector(this.formSelector))
+        );
+        this.ignoreElements = <HTMLElement[]>(
+            Array.from(
+                this.ignoreClassName
+                    ? this.form.getElementsByClassName(this.ignoreClassName)
+                    : this.form.querySelectorAll(this.ignoreSelector),
+            )
         );
         const formInputs = <HTMLElement[]>Array.from(this.form.getElementsByTagName('input'));
         const formSelects = <HTMLElement[]>Array.from(this.form.getElementsByTagName('select'));

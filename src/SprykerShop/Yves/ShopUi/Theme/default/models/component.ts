@@ -31,7 +31,6 @@ export default abstract class Component extends HTMLElement {
         this.isComponentMounted = false;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     protected dispatchCustomEvent(name: string, detail: any = {}, options?: CustomEventOptions): void {
         const customEvent = new CustomEvent(name, { detail, ...options });
         this.dispatchEvent(customEvent);
@@ -42,7 +41,7 @@ export default abstract class Component extends HTMLElement {
      *
      * @deprecated Use init() instead.
      */
-    // eslint-disable-next-line deprecation/deprecation
+
     protected abstract readyCallback(): void;
 
     /**
@@ -56,7 +55,6 @@ export default abstract class Component extends HTMLElement {
      * Using_custom_elements#Using_the_lifecycle_callbacks}
      */
     protected init(): void {
-        // eslint-disable-next-line deprecation/deprecation
         this.readyCallback();
     }
 

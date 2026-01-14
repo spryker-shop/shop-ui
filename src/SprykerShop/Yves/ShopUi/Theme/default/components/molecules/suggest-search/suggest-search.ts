@@ -55,10 +55,11 @@ export default class SuggestSearch extends Component {
     protected readyCallback(): void {
         this.ajaxProvider = <AjaxProvider>this.getElementsByClassName(`${this.jsName}__ajax-provider`)[0];
         this.suggestionsContainer = <HTMLElement>this.getElementsByClassName(`${this.jsName}__container`)[0];
-        this.searchInput = <HTMLInputElement>(this.searchInputClassName
-            ? document.getElementsByClassName(this.searchInputClassName)[0]
-            : // eslint-disable-next-line deprecation/deprecation
-              document.querySelector(this.searchInputSelector));
+        this.searchInput = <HTMLInputElement>(
+            (this.searchInputClassName
+                ? document.getElementsByClassName(this.searchInputClassName)[0]
+                : document.querySelector(this.searchInputSelector))
+        );
         this.navigationActiveClass = `${this.name}__item--active`;
         if (this.parentElementClassName) {
             this.parentWrapper = this.closest(`.${this.parentElementClassName}`);

@@ -8,11 +8,12 @@ export default class TogglerHash extends Component {
 
     constructor() {
         super();
-        this.targets = <HTMLElement[]>Array.from(
-            this.targetClassName
-                ? document.getElementsByClassName(this.targetClassName)
-                : // eslint-disable-next-line deprecation/deprecation
-                  document.querySelectorAll(this.targetSelector),
+        this.targets = <HTMLElement[]>(
+            Array.from(
+                this.targetClassName
+                    ? document.getElementsByClassName(this.targetClassName)
+                    : document.querySelectorAll(this.targetSelector),
+            )
         );
     }
 

@@ -18,11 +18,12 @@ export default class TogglerCheckbox extends Component {
     constructor() {
         super();
         this.trigger = <HTMLInputElement>this.getElementsByClassName(`${this.jsName}__trigger`)[0];
-        this.targets = <HTMLElement[]>Array.from(
-            this.targetClassName
-                ? document.getElementsByClassName(this.targetClassName)
-                : // eslint-disable-next-line deprecation/deprecation
-                  document.querySelectorAll(this.targetSelector),
+        this.targets = <HTMLElement[]>(
+            Array.from(
+                this.targetClassName
+                    ? document.getElementsByClassName(this.targetClassName)
+                    : document.querySelectorAll(this.targetSelector),
+            )
         );
     }
 

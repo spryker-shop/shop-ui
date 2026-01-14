@@ -23,7 +23,6 @@ function onApplicationError(e: CustomEvent): void {
     error('application error ->', e.detail);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function dispatchCustomEvent(name: string, detail: any = {}): void {
     const event = new CustomEvent(name, { detail });
     document.dispatchEvent(event);
@@ -78,7 +77,7 @@ export async function mount(): Promise<void> {
         /**
          * @deprecated Use events.mount instead.
          */
-        // eslint-disable-next-line deprecation/deprecation
+
         dispatchCustomEvent(config().events.ready);
 
         if (isBootstrap) {

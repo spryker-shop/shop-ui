@@ -10,9 +10,9 @@ interface DynamicParams {
 
 export const EVENT_FETCHING = 'fetching';
 export const EVENT_FETCHED = 'fetched';
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 type Resolve = (value: any) => void;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 type Reject = (reason?: any) => void;
 
 /**
@@ -76,7 +76,7 @@ export default class AjaxProvider extends Component {
      * @param data Optional data sent to the server in the request body.
      * @returns A generic typed promise connected to the ajax request.
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     async fetch<T = string>(data?: any): Promise<T> {
         if (
             this.elementVisibilityChecker &&

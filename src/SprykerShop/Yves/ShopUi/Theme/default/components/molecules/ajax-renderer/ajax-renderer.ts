@@ -12,14 +12,16 @@ export default class AjaxRenderer extends Component {
 
     protected init(): void {
         this.parent = <HTMLElement>(this.parentClassName ? this.closest(`.${this.parentClassName}`) : document);
-        this.provider = <AjaxProvider>(this.providerClassName
-            ? this.parent.getElementsByClassName(this.providerClassName)[0]
-            : // eslint-disable-next-line deprecation/deprecation
-              this.parent.querySelector(this.providerSelector));
-        this.target = <HTMLElement>(this.targetClassName
-            ? this.parent.getElementsByClassName(this.targetClassName)[0]
-            : // eslint-disable-next-line deprecation/deprecation
-              this.parent.querySelector(this.targetSelector ? this.targetSelector : undefined));
+        this.provider = <AjaxProvider>(
+            (this.providerClassName
+                ? this.parent.getElementsByClassName(this.providerClassName)[0]
+                : this.parent.querySelector(this.providerSelector))
+        );
+        this.target = <HTMLElement>(
+            (this.targetClassName
+                ? this.parent.getElementsByClassName(this.targetClassName)[0]
+                : this.parent.querySelector(this.targetSelector ? this.targetSelector : undefined))
+        );
 
         this.mapEvents();
     }
