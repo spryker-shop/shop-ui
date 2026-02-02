@@ -1,0 +1,65 @@
+{% extends model('component') %}
+
+{% define config = {
+    name: 'empty-state',
+}%}
+
+{% define data = {
+    title: required,
+    description: '',
+    iconName: null,
+    actionButton: {
+        text: null,
+        link: null,
+        class: 'button',
+        icon: {
+            name: null,
+            modifiers: [],
+            qa: null,
+        },
+    },
+}%}
+
+{% block body %}
+    {% block icon %}
+        {% if data.iconName %}
+            {% include atom('icon') with {
+                class: config.name ~ '__icon',
+                data: {
+                    name: data.iconName,
+                },
+            } only%}
+        {% endif %}
+    {% endblock %}
+
+    {% block title %}
+        <h2 class="{{ config.name }}__title">{{ data.title }}</h2>
+    {% endblock %}
+
+    {% block description %}
+        {% if data.description %}
+            <p class="{{ config.name }}__description">
+                {{ data.description }}
+            </p>
+        {% endif %}
+    {% endblock %}
+
+    {% set actionButton = data.actionButton %}
+
+    {% block action %}
+        {% if actionButton.text and actionButton.link %}
+            <a href="{{ actionButton.link }}" class="{{ actionButton.class }}" {{ actionButton.qa ? qa(actionButton.qa) }}>
+                {% if actionButton.icon.name %}
+                    {% include atom('icon') with {
+                        modifiers: actionButton.icon.modifiers,
+                        data: {
+                            name: actionButton.icon.name,
+                        },
+                    } only%}
+                {% endif %}
+
+                {{ actionButton.text }}
+            </a>
+        {% endif %}
+    {% endblock %}
+{% endblock %}
