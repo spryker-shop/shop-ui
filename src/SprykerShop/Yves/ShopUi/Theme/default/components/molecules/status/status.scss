@@ -1,5 +1,52 @@
 @mixin shop-ui-status($name: '.status') {
     @include shop-ui-badge($name) {
+        &--availability {
+            padding: 0 0.75rem 0 1.875rem;
+            position: relative;
+            background-color: helper-color-light($setting-color-main);
+            color: $setting-color-black;
+            line-height: 1.625rem;
+            border-radius: 0.25rem;
+
+            &::before {
+                content: '';
+                position: absolute;
+                left: 0.75rem;
+                top: 50%;
+                translate: 0 -50%;
+                width: 0.625rem;
+                aspect-ratio: 1;
+                background-color: $setting-color-main;
+                border-radius: 100%;
+            }
+        }
+
+        &--out-of-stock {
+            background-color: helper-color-light(map-get($setting-color-actions, 'alert'));
+
+            &::before {
+                background-color: map-get($setting-color-actions, 'alert');
+            }
+        }
+
+        &--in-stock,
+        &--never-out-of-stock,
+        &--available {
+            background-color: helper-color-light(map-get($setting-color-actions, 'success'));
+
+            &::before {
+                background-color: map-get($setting-color-actions, 'success');
+            }
+        }
+
+        &--running-low {
+            background-color: helper-color-light(map-get($setting-color-actions, 'warning'));
+
+            &::before {
+                background-color: map-get($setting-color-actions, 'warning');
+            }
+        }
+
         &--rejected,
         &--in-progress,
         &--refunded {
