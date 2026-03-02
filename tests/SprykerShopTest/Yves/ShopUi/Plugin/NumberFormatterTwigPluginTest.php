@@ -43,9 +43,6 @@ class NumberFormatterTwigPluginTest extends Unit
      */
     protected const GET_NUMBER_FORMAT_CONFIG_FUNCTION_NAME = 'getNumberFormatConfig';
 
-    /**
-     * @return void
-     */
     public function testExtendShouldAddNumberFormatterFunctions(): void
     {
         // Arrange

@@ -9,13 +9,7 @@ namespace SprykerShop\Yves\ShopUi\Dependency\Client;
 
 interface ShopUiToTwigClientInterface
 {
-    /**
-     * @return string
-     */
     public function getYvesThemeName(): string;
 
-    /**
-     * @return string
-     */
     public function getYvesThemeNameDefault(): string;
 }

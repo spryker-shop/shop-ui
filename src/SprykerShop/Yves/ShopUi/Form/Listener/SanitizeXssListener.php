@@ -25,9 +25,6 @@ class SanitizeXssListener implements EventSubscriberInterface
      */
     protected ShopUiToUtilSanitizeXssServiceInterface $utilSanitizeXssService;
 
-    /**
-     * @param \SprykerShop\Yves\ShopUi\Dependency\Service\ShopUiToUtilSanitizeXssServiceInterface $utilSanitizeXssService
-     */
     public function __construct(ShopUiToUtilSanitizeXssServiceInterface $utilSanitizeXssService)
     {
         $this->utilSanitizeXssService = $utilSanitizeXssService;
@@ -43,11 +40,6 @@ class SanitizeXssListener implements EventSubscriberInterface
         ];
     }
 
-    /**
-     * @param \Symfony\Component\Form\FormEvent $event
-     *
-     * @return void
-     */
     public function sanitizeSubmittedData(FormEvent $event): void
     {
         $data = $event->getData();

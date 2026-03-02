@@ -27,10 +27,6 @@ class AssetsUrlProvider implements AssetsUrlProviderInterface
      */
     protected $twigClient;
 
-    /**
-     * @param \SprykerShop\Yves\ShopUi\ShopUiConfig $config
-     * @param \SprykerShop\Yves\ShopUi\Dependency\Client\ShopUiToTwigClientInterface $twigClient
-     */
     public function __construct(
         ShopUiConfig $config,
         ShopUiToTwigClientInterface $twigClient
@@ -39,9 +35,6 @@ class AssetsUrlProvider implements AssetsUrlProviderInterface
         $this->twigClient = $twigClient;
     }
 
-    /**
-     * @return string
-     */
     public function getAssetsUrl(): string
     {
         $yvesAssetsUrl = strtr($this->config->getYvesAssetsUrlPattern(), [
@@ -51,9 +44,6 @@ class AssetsUrlProvider implements AssetsUrlProviderInterface
         return rtrim($yvesAssetsUrl, '/') . '/';
     }
 
-    /**
-     * @return string
-     */
     protected function getThemeName(): string
     {
         $themeName = $this->twigClient->getYvesThemeName();

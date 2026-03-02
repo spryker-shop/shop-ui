@@ -30,17 +30,11 @@ class NumberFormatterTwigFilterFactory implements NumberFormatterTwigFilterFacto
      */
     protected ShopUiToUtilNumberServiceInterface $utilNumberService;
 
-    /**
-     * @param \SprykerShop\Yves\ShopUi\Dependency\Service\ShopUiToUtilNumberServiceInterface $utilNumberService
-     */
     public function __construct(ShopUiToUtilNumberServiceInterface $utilNumberService)
     {
         $this->utilNumberService = $utilNumberService;
     }
 
-    /**
-     * @return \Twig\TwigFilter
-     */
     public function createFormatIntFilter(): TwigFilter
     {
         return new TwigFilter(
@@ -53,9 +47,6 @@ class NumberFormatterTwigFilterFactory implements NumberFormatterTwigFilterFacto
         );
     }
 
-    /**
-     * @return \Twig\TwigFilter
-     */
     public function createFormatFloatFilter(): TwigFilter
     {
         return new TwigFilter(
@@ -68,14 +59,6 @@ class NumberFormatterTwigFilterFactory implements NumberFormatterTwigFilterFacto
         );
     }
 
-    /**
-     * @param int $value
-     * @param string|null $locale
-     * @param int|null $numberFormatStyle
-     * @param int|null $maxFractionDigits
-     *
-     * @return \Generated\Shared\Transfer\NumberFormatIntRequestTransfer
-     */
     protected function createNumberFormatIntRequest(
         int $value,
         ?string $locale = null,
@@ -89,14 +72,6 @@ class NumberFormatterTwigFilterFactory implements NumberFormatterTwigFilterFacto
             );
     }
 
-    /**
-     * @param float $value
-     * @param string|null $locale
-     * @param int|null $numberFormatStyle
-     * @param int|null $maxFractionDigits
-     *
-     * @return \Generated\Shared\Transfer\NumberFormatFloatRequestTransfer
-     */
     protected function createNumberFormatFloatRequest(
         float $value,
         ?string $locale = null,
@@ -110,13 +85,6 @@ class NumberFormatterTwigFilterFactory implements NumberFormatterTwigFilterFacto
             );
     }
 
-    /**
-     * @param string|null $locale
-     * @param int|null $numberFormatStyle
-     * @param int|null $maxFractionDigits
-     *
-     * @return \Generated\Shared\Transfer\NumberFormatFilterTransfer
-     */
     protected function createNumberFormatFilter(
         ?string $locale = null,
         ?int $numberFormatStyle = null,

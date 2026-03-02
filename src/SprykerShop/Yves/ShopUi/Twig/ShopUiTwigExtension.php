@@ -93,11 +93,6 @@ class ShopUiTwigExtension extends TwigExtension
      */
     protected $shopUiConfig;
 
-    /**
-     * @param \SprykerShop\Yves\ShopUi\Dependency\Client\ShopUiToLocaleClientInterface $localeClient
-     * @param \SprykerShop\Yves\ShopUi\ShopUiConfig $shopUiConfig
-     * @param \SprykerShop\Yves\ShopUi\Twig\Assets\AssetsUrlProviderInterface|null $assetsUrlProvider
-     */
     public function __construct(
         ShopUiToLocaleClientInterface $localeClient,
         ShopUiConfig $shopUiConfig,
@@ -217,9 +212,6 @@ class ShopUiTwigExtension extends TwigExtension
         ];
     }
 
-    /**
-     * @return string
-     */
     protected function getPublicFolderPath(): string
     {
         if ($this->assetsUrlProvider) {
@@ -229,12 +221,6 @@ class ShopUiTwigExtension extends TwigExtension
         return '/assets/';
     }
 
-    /**
-     * @param array $qaValues
-     * @param string|null $qaName
-     *
-     * @return string
-     */
     protected function getQaAttribute(array $qaValues = [], ?string $qaName = null): string
     {
         $value = '';
@@ -256,55 +242,26 @@ class ShopUiTwigExtension extends TwigExtension
         return 'data-qa-' . $qaName . '="' . trim($value) . '"';
     }
 
-    /**
-     * @param string $modelName
-     *
-     * @return string
-     */
     protected function getModelTemplate(string $modelName): string
     {
         return '@ShopUi/models/' . $modelName . '.twig';
     }
 
-    /**
-     * @param string $componentModule
-     * @param string $componentType
-     * @param string $componentName
-     *
-     * @return string
-     */
     protected function getComponentTemplate(string $componentModule, string $componentType, string $componentName): string
     {
         return '@' . $componentModule . '/components/' . $componentType . '/' . $componentName . '/' . $componentName . '.twig';
     }
 
-    /**
-     * @param string $templateModule
-     * @param string $templateName
-     *
-     * @return string
-     */
     protected function getTemplateTemplate(string $templateModule, string $templateName): string
     {
         return '@' . $templateModule . '/templates/' . $templateName . '/' . $templateName . '.twig';
     }
 
-    /**
-     * @param string $viewModule
-     * @param string $viewName
-     *
-     * @return string
-     */
     protected function getViewTemplate(string $viewModule, string $viewName): string
     {
         return '@' . $viewModule . '/views/' . $viewName . '/' . $viewName . '.twig';
     }
 
-    /**
-     * @param string $filterValue
-     *
-     * @return string
-     */
     protected function trimLocale(string $filterValue): string
     {
         return preg_replace(
@@ -314,9 +271,6 @@ class ShopUiTwigExtension extends TwigExtension
         );
     }
 
-    /**
-     * @return string
-     */
     protected function getLocalePattern(): string
     {
         if ($this->localesFilterPattern) {

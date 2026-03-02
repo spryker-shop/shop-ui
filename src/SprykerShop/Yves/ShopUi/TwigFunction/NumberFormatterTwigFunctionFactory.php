@@ -22,17 +22,11 @@ class NumberFormatterTwigFunctionFactory implements NumberFormatterTwigFunctionF
      */
     protected ShopUiToUtilNumberServiceInterface $utilNumberService;
 
-    /**
-     * @param \SprykerShop\Yves\ShopUi\Dependency\Service\ShopUiToUtilNumberServiceInterface $utilNumberService
-     */
     public function __construct(ShopUiToUtilNumberServiceInterface $utilNumberService)
     {
         $this->utilNumberService = $utilNumberService;
     }
 
-    /**
-     * @return \Twig\TwigFunction
-     */
     public function createGetNumberFormatConfigFunction(): TwigFunction
     {
         return new TwigFunction(

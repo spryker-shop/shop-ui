@@ -33,13 +33,6 @@ class AbstractFormattedType extends AbstractType
      */
     protected const OPTION_DECIMAL_SEPARATOR_SYMBOL = 'decimal_separator_symbol';
 
-    /**
-     * @param \Symfony\Component\Form\FormView $view
-     * @param \Symfony\Component\Form\FormInterface $form
-     * @param array $options
-     *
-     * @return void
-     */
     public function buildView(FormView $view, FormInterface $form, array $options): void
     {
         $options = $this->provideMissingFormattingOptions($options);
@@ -48,11 +41,6 @@ class AbstractFormattedType extends AbstractType
         $view->vars[static::OPTION_DECIMAL_SEPARATOR_SYMBOL] = $options[static::OPTION_DECIMAL_SEPARATOR_SYMBOL];
     }
 
-    /**
-     * @param \Symfony\Component\OptionsResolver\OptionsResolver $resolver
-     *
-     * @return void
-     */
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setRequired(static::OPTION_LOCALE);
@@ -66,11 +54,6 @@ class AbstractFormattedType extends AbstractType
         $resolver->setAllowedTypes(static::OPTION_DECIMAL_SEPARATOR_SYMBOL, 'string');
     }
 
-    /**
-     * @param array $options
-     *
-     * @return array
-     */
     protected function provideMissingFormattingOptions(array $options): array
     {
         if ($this->isAllFormattingOptionsSet($options)) {
@@ -87,11 +70,6 @@ class AbstractFormattedType extends AbstractType
         return $options;
     }
 
-    /**
-     * @param array $options
-     *
-     * @return bool
-     */
     protected function isAllFormattingOptionsSet(array $options): bool
     {
         return isset(

@@ -11,8 +11,5 @@ use Twig\TwigFunction;
 
 interface NumberFormatterTwigFunctionFactoryInterface
 {
-    /**
-     * @return \Twig\TwigFunction
-     */
     public function createGetNumberFormatConfigFunction(): TwigFunction;
 }

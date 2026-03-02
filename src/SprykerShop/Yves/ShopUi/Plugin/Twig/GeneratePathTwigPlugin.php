@@ -67,11 +67,6 @@ class GeneratePathTwigPlugin extends AbstractPlugin implements TwigPluginInterfa
         return $twig;
     }
 
-    /**
-     * @param \Twig\Environment $twig
-     *
-     * @return \Twig\Environment
-     */
     protected function addTwigFunctions(Environment $twig): Environment
     {
         $twig->addFunction($this->createGeneratePath());
@@ -79,9 +74,6 @@ class GeneratePathTwigPlugin extends AbstractPlugin implements TwigPluginInterfa
         return $twig;
     }
 
-    /**
-     * @return \Twig\TwigFunction
-     */
     protected function createGeneratePath(): TwigFunction
     {
         return new TwigFunction(

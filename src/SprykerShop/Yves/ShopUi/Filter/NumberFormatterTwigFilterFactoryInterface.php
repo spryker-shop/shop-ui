@@ -11,13 +11,7 @@ use Twig\TwigFilter;
 
 interface NumberFormatterTwigFilterFactoryInterface
 {
-    /**
-     * @return \Twig\TwigFilter
-     */
     public function createFormatIntFilter(): TwigFilter;
 
-    /**
-     * @return \Twig\TwigFilter
-     */
     public function createFormatFloatFilter(): TwigFilter;
 }

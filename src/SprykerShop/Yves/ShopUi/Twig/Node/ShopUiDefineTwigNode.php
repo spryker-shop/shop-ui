@@ -24,13 +24,6 @@ class ShopUiDefineTwigNode extends Node
      */
     protected $shopUiConfig;
 
-    /**
-     * @param \SprykerShop\Yves\ShopUi\ShopUiConfig $shopUiConfig
-     * @param string $name
-     * @param \Twig\Node\Expression\AbstractExpression $value
-     * @param int $line
-     * @param string|null $tag
-     */
     public function __construct(
         ShopUiConfig $shopUiConfig,
         string $name,
@@ -43,11 +36,6 @@ class ShopUiDefineTwigNode extends Node
         $this->shopUiConfig = $shopUiConfig;
     }
 
-    /**
-     * @param \Twig\Compiler $compiler
-     *
-     * @return void
-     */
     public function compile(Compiler $compiler): void
     {
         $key = "'" . $this->getAttribute('name') . "'";
@@ -59,12 +47,6 @@ class ShopUiDefineTwigNode extends Node
         $this->addRequiredValueCheck($compiler, $key);
     }
 
-    /**
-     * @param \Twig\Compiler $compiler
-     * @param string $key
-     *
-     * @return \Twig\Compiler
-     */
     protected function addDefaultValueSetter(Compiler $compiler, string $key): Compiler
     {
         $compiler->raw('if (!array_key_exists(' . $key . ', $context)) {')
@@ -74,12 +56,6 @@ class ShopUiDefineTwigNode extends Node
         return $compiler;
     }
 
-    /**
-     * @param \Twig\Compiler $compiler
-     * @param string $key
-     *
-     * @return \Twig\Compiler
-     */
     protected function addValueReplacer(Compiler $compiler, string $key): Compiler
     {
         $compiler->raw('$context[' . $key . '] = array_replace_recursive(')
@@ -89,12 +65,6 @@ class ShopUiDefineTwigNode extends Node
         return $compiler;
     }
 
-    /**
-     * @param \Twig\Compiler $compiler
-     * @param string $key
-     *
-     * @return \Twig\Compiler
-     */
     protected function addRequiredValueCheck(Compiler $compiler, string $key): Compiler
     {
         if (!$this->shopUiConfig->isDevelopmentMode()) {

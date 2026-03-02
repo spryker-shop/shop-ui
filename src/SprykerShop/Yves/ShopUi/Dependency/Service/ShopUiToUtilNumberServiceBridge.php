@@ -26,31 +26,16 @@ class ShopUiToUtilNumberServiceBridge implements ShopUiToUtilNumberServiceInterf
         $this->utilNumberService = $utilNumberService;
     }
 
-    /**
-     * @param \Generated\Shared\Transfer\NumberFormatIntRequestTransfer $numberFormatIntRequestTransfer
-     *
-     * @return string
-     */
     public function formatInt(NumberFormatIntRequestTransfer $numberFormatIntRequestTransfer): string
     {
         return $this->utilNumberService->formatInt($numberFormatIntRequestTransfer);
     }
 
-    /**
-     * @param \Generated\Shared\Transfer\NumberFormatFloatRequestTransfer $numberFormatFloatRequestTransfer
-     *
-     * @return string
-     */
     public function formatFloat(NumberFormatFloatRequestTransfer $numberFormatFloatRequestTransfer): string
     {
         return $this->utilNumberService->formatFloat($numberFormatFloatRequestTransfer);
     }
 
-    /**
-     * @param string|null $locale
-     *
-     * @return \Generated\Shared\Transfer\NumberFormatConfigTransfer
-     */
     public function getNumberFormatConfig(?string $locale = null): NumberFormatConfigTransfer
     {
         return $this->utilNumberService->getNumberFormatConfig($locale);

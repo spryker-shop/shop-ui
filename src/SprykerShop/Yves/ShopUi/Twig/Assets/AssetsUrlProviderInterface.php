@@ -9,8 +9,5 @@ namespace SprykerShop\Yves\ShopUi\Twig\Assets;
 
 interface AssetsUrlProviderInterface
 {
-    /**
-     * @return string
-     */
     public function getAssetsUrl(): string;
 }

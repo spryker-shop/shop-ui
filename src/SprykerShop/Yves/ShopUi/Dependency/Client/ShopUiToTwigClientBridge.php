@@ -22,17 +22,11 @@ class ShopUiToTwigClientBridge implements ShopUiToTwigClientInterface
         $this->twigClient = $twigClient;
     }
 
-    /**
-     * @return string
-     */
     public function getYvesThemeName(): string
     {
         return $this->twigClient->getYvesThemeName();
     }
 
-    /**
-     * @return string
-     */
     public function getYvesThemeNameDefault(): string
     {
         return $this->twigClient->getYvesThemeNameDefault();

@@ -23,10 +23,6 @@ class NumberFormatterTwigExtender implements NumberFormatterTwigExtenderInterfac
      */
     protected NumberFormatterTwigFunctionFactoryInterface $numberFormatterTwigFunctionFactory;
 
-    /**
-     * @param \SprykerShop\Yves\ShopUi\Filter\NumberFormatterTwigFilterFactoryInterface $numberFormatterTwigFilterFactory
-     * @param \SprykerShop\Yves\ShopUi\TwigFunction\NumberFormatterTwigFunctionFactoryInterface $numberFormatterTwigFunctionFactory
-     */
     public function __construct(
         NumberFormatterTwigFilterFactoryInterface $numberFormatterTwigFilterFactory,
         NumberFormatterTwigFunctionFactoryInterface $numberFormatterTwigFunctionFactory
@@ -35,11 +31,6 @@ class NumberFormatterTwigExtender implements NumberFormatterTwigExtenderInterfac
         $this->numberFormatterTwigFunctionFactory = $numberFormatterTwigFunctionFactory;
     }
 
-    /**
-     * @param \Twig\Environment $twig
-     *
-     * @return \Twig\Environment
-     */
     public function extend(Environment $twig): Environment
     {
         $twig = $this->addTwigFilters($twig);
@@ -48,11 +39,6 @@ class NumberFormatterTwigExtender implements NumberFormatterTwigExtenderInterfac
         return $twig;
     }
 
-    /**
-     * @param \Twig\Environment $twig
-     *
-     * @return \Twig\Environment
-     */
     protected function addTwigFilters(Environment $twig): Environment
     {
         $twig->addFilter($this->numberFormatterTwigFilterFactory->createFormatIntFilter());
@@ -61,11 +47,6 @@ class NumberFormatterTwigExtender implements NumberFormatterTwigExtenderInterfac
         return $twig;
     }
 
-    /**
-     * @param \Twig\Environment $twig
-     *
-     * @return \Twig\Environment
-     */
     protected function addTwigFunctions(Environment $twig): Environment
     {
         $twig->addFunction($this->numberFormatterTwigFunctionFactory->createGetNumberFormatConfigFunction());

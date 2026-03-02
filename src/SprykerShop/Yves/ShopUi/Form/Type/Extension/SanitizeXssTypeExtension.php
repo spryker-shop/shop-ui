@@ -36,9 +36,6 @@ class SanitizeXssTypeExtension extends AbstractTypeExtension
      */
     protected ShopUiToUtilSanitizeXssServiceInterface $utilSanitizeXssService;
 
-    /**
-     * @param \SprykerShop\Yves\ShopUi\Dependency\Service\ShopUiToUtilSanitizeXssServiceInterface $utilSanitizeXssService
-     */
     public function __construct(ShopUiToUtilSanitizeXssServiceInterface $utilSanitizeXssService)
     {
         $this->utilSanitizeXssService = $utilSanitizeXssService;
@@ -54,11 +51,6 @@ class SanitizeXssTypeExtension extends AbstractTypeExtension
         ];
     }
 
-    /**
-     * @param \Symfony\Component\OptionsResolver\OptionsResolver $resolver
-     *
-     * @return void
-     */
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver

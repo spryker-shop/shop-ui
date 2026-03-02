@@ -11,10 +11,5 @@ use Twig\Environment;
 
 interface NumberFormatterTwigExtenderInterface
 {
-    /**
-     * @param \Twig\Environment $twig
-     *
-     * @return \Twig\Environment
-     */
     public function extend(Environment $twig): Environment;
 }

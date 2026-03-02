@@ -14,13 +14,6 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class DropzoneType extends FileType
 {
-    /**
-     * @param \Symfony\Component\Form\FormView $view
-     * @param \Symfony\Component\Form\FormInterface $form
-     * @param array $options
-     *
-     * @return void
-     */
     public function buildView(FormView $view, FormInterface $form, array $options): void
     {
         parent::buildView($view, $form, $options);
@@ -28,19 +21,11 @@ class DropzoneType extends FileType
         $view->vars['attr']['type'] = 'file';
     }
 
-    /**
-     * @param \Symfony\Component\OptionsResolver\OptionsResolver $resolver
-     *
-     * @return void
-     */
     public function configureOptions(OptionsResolver $resolver): void
     {
         parent::configureOptions($resolver);
     }
 
-    /**
-     * @return string
-     */
     public function getBlockPrefix(): string
     {
         return 'dropzone';

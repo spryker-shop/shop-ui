@@ -41,11 +41,6 @@ class FunctionTwigPlugin extends AbstractPlugin implements TwigPluginInterface
         return $twig;
     }
 
-    /**
-     * @param \Twig\Environment $twig
-     *
-     * @return \Twig\Environment
-     */
     protected function addTwigFunctions(Environment $twig): Environment
     {
         $twig->addFunction($this->createFunctionExistsFunction($twig));
@@ -53,11 +48,6 @@ class FunctionTwigPlugin extends AbstractPlugin implements TwigPluginInterface
         return $twig;
     }
 
-    /**
-     * @param \Twig\Environment $twig
-     *
-     * @return \Twig\TwigFunction
-     */
     protected function createFunctionExistsFunction(Environment $twig): TwigFunction
     {
         return new TwigFunction(

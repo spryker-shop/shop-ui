@@ -13,24 +13,9 @@ use Generated\Shared\Transfer\NumberFormatIntRequestTransfer;
 
 interface ShopUiToUtilNumberServiceInterface
 {
-    /**
-     * @param \Generated\Shared\Transfer\NumberFormatIntRequestTransfer $numberFormatIntRequestTransfer
-     *
-     * @return string
-     */
     public function formatInt(NumberFormatIntRequestTransfer $numberFormatIntRequestTransfer): string;
 
-    /**
-     * @param \Generated\Shared\Transfer\NumberFormatFloatRequestTransfer $numberFormatFloatRequestTransfer
-     *
-     * @return string
-     */
     public function formatFloat(NumberFormatFloatRequestTransfer $numberFormatFloatRequestTransfer): string;
 
-    /**
-     * @param string|null $locale
-     *
-     * @return \Generated\Shared\Transfer\NumberFormatConfigTransfer
-     */
     public function getNumberFormatConfig(?string $locale = null): NumberFormatConfigTransfer;
 }

@@ -19,27 +19,16 @@ class ShopUiDefineTwigTokenParser extends AbstractTokenParser
      */
     protected $shopUiConfig;
 
-    /**
-     * @param \SprykerShop\Yves\ShopUi\ShopUiConfig $shopUiConfig
-     */
     public function __construct(ShopUiConfig $shopUiConfig)
     {
         $this->shopUiConfig = $shopUiConfig;
     }
 
-    /**
-     * @return string
-     */
     public function getTag(): string
     {
         return 'define';
     }
 
-    /**
-     * @param \Twig\Token $token
-     *
-     * @return \SprykerShop\Yves\ShopUi\Twig\Node\ShopUiDefineTwigNode
-     */
     public function parse(Token $token): ShopUiDefineTwigNode
     {
         $parser = $this->parser;

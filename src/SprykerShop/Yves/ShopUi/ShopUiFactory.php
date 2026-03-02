@@ -41,9 +41,6 @@ class ShopUiFactory extends AbstractFactory
         );
     }
 
-    /**
-     * @return \SprykerShop\Yves\ShopUi\Twig\Assets\AssetsUrlProviderInterface
-     */
     public function createAssetsUrlProvider(): AssetsUrlProviderInterface
     {
         return new AssetsUrlProvider(
@@ -52,9 +49,6 @@ class ShopUiFactory extends AbstractFactory
         );
     }
 
-    /**
-     * @return \SprykerShop\Yves\ShopUi\Extender\NumberFormatterTwigExtenderInterface
-     */
     public function createNumberFormatterTwigExtender(): NumberFormatterTwigExtenderInterface
     {
         return new NumberFormatterTwigExtender(
@@ -63,9 +57,6 @@ class ShopUiFactory extends AbstractFactory
         );
     }
 
-    /**
-     * @return \SprykerShop\Yves\ShopUi\Filter\NumberFormatterTwigFilterFactoryInterface
-     */
     public function createNumberFormatterTwigFilterFactory(): NumberFormatterTwigFilterFactoryInterface
     {
         return new NumberFormatterTwigFilterFactory(
@@ -73,9 +64,6 @@ class ShopUiFactory extends AbstractFactory
         );
     }
 
-    /**
-     * @return \SprykerShop\Yves\ShopUi\TwigFunction\NumberFormatterTwigFunctionFactoryInterface
-     */
     public function createNumberFormatterTwigFunctionFactory(): NumberFormatterTwigFunctionFactoryInterface
     {
         return new NumberFormatterTwigFunctionFactory(
@@ -83,41 +71,26 @@ class ShopUiFactory extends AbstractFactory
         );
     }
 
-    /**
-     * @return \Symfony\Component\Form\FormTypeExtensionInterface
-     */
     public function createSanitizeXssTypeExtension(): FormTypeExtensionInterface
     {
         return new SanitizeXssTypeExtension($this->getUtilSanitizeXssService());
     }
 
-    /**
-     * @return \SprykerShop\Yves\ShopUi\Dependency\Client\ShopUiToTwigClientInterface
-     */
     public function getTwigClient(): ShopUiToTwigClientInterface
     {
         return $this->getProvidedDependency(ShopUiDependencyProvider::CLIENT_TWIG);
     }
 
-    /**
-     * @return \SprykerShop\Yves\ShopUi\Dependency\Client\ShopUiToLocaleClientInterface
-     */
     public function getLocaleClient(): ShopUiToLocaleClientInterface
     {
         return $this->getProvidedDependency(ShopUiDependencyProvider::CLIENT_LOCALE);
     }
 
-    /**
-     * @return \SprykerShop\Yves\ShopUi\Dependency\Service\ShopUiToUtilNumberServiceInterface
-     */
     public function getUtilNumberService(): ShopUiToUtilNumberServiceInterface
     {
         return $this->getProvidedDependency(ShopUiDependencyProvider::SERVICE_UTIL_NUMBER);
     }
 
-    /**
-     * @return \SprykerShop\Yves\ShopUi\Dependency\Service\ShopUiToUtilSanitizeXssServiceInterface
-     */
     public function getUtilSanitizeXssService(): ShopUiToUtilSanitizeXssServiceInterface
     {
         return $this->getProvidedDependency(ShopUiDependencyProvider::SERVICE_UTIL_SANITIZE_XSS);

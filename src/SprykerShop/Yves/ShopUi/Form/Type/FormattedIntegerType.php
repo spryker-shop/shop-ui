@@ -15,17 +15,11 @@ use Symfony\Component\Form\Extension\Core\Type\NumberType;
  */
 class FormattedIntegerType extends AbstractFormattedType
 {
-    /**
-     * @return string
-     */
     public function getParent(): string
     {
         return NumberType::class;
     }
 
-    /**
-     * @return string
-     */
     public function getBlockPrefix(): string
     {
         return 'formatted_integer';

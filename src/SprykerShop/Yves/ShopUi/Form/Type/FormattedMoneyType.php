@@ -20,17 +20,11 @@ class FormattedMoneyType extends AbstractFormattedType
      */
     protected const BLOCK_PREFIX = 'formatted_money';
 
-    /**
-     * @return string
-     */
     public function getParent(): string
     {
         return MoneyType::class;
     }
 
-    /**
-     * @return string
-     */
     public function getBlockPrefix(): string
     {
         return static::BLOCK_PREFIX;
