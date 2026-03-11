@@ -97,7 +97,6 @@
     {% block groups %}
         {% if data.idProductAbstract %}
             {% block productAbstractGroups %}
-                {% widget 'ProductGroupWidget' args [data.idProductAbstract] only %}{% endwidget %}
             {% endblock %}
         {% endif %}
     {% endblock %}

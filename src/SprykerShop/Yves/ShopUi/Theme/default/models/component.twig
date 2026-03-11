@@ -37,6 +37,8 @@
 {% import _self as component %}
 
 {% block component %}
+    {% set componentName = config.name %}
+    {% set componentJsName = config.jsName %}
     <{{-config.tag}} class="
         {%- if config.name == config.tag and '-' in config.tag -%}custom-element {% endif -%}
 

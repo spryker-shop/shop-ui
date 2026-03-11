@@ -24,11 +24,7 @@
     {% endblock %}
 
     {% block groups %}
-        {% widget 'ProductGroupWidget' args [data.abstractId] only %}
-        {% elsewidget 'ProductGroupWidgetPlugin' args [data.abstractId] only %} {# @deprecated Use ProductGroupWidget instead. #}
-        {% endwidget %}
     {% endblock %}
-
     {% block name %}
         <strong>{{data.name}}</strong>
     {% endblock %}
