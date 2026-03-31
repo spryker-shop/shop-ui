@@ -25,7 +25,11 @@
 
                     {% if data.byImage and widgetGlobalExists('ImageSearchAiWidget') %}
                         <div class="col col--sm-auto-width">
-                            {% widget 'ImageSearchAiWidget' only %}{% endwidget %}
+                            {% widget 'ImageSearchAiWidget' with {
+                                data: {
+                                    dataSearchId: attributes['data-search-id'],
+                                },
+                            } only %}{% endwidget %}
                         </div>
                     {% endif %}
                 </div>
