@@ -1,12 +1,12 @@
 /**
  * Defines the main color of the shop theme. Usage: primary elements' background and color.
  */
-$setting-color-main: #1479bd !default;
+$setting-color-main: var(--background-brand-primary, #1479bd) !default;
 
 /**
  * Defines alternative color of the shop theme. Usage: secondary elements' background and color.
  */
-$setting-color-alt: #e2694a !default;
+$setting-color-alt: var(--background-brand-subtle, #e2694a) !default;
 
 /**
  * Defines white color. Usage: not transparent elements' background of default background.

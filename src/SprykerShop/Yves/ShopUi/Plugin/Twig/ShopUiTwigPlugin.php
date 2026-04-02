@@ -19,6 +19,9 @@ class ShopUiTwigPlugin extends AbstractPlugin implements TwigPluginInterface
 {
     /**
      * {@inheritDoc}
+     * - Extends Twig environment with functions `publicPath`, `qa`, `qa_*`, `model`, `atom`, `molecule`, `organism`, `template`, `view` and filter `trimLocale`.
+     * - Also provides function `configurationValue` to retrieve any module configuration value in storefront.
+     * - Also provides function `configurationValues` to retrieve all module configuration values under a key prefix in storefront.
      *
      * @api
      *
@@ -29,8 +32,9 @@ class ShopUiTwigPlugin extends AbstractPlugin implements TwigPluginInterface
      */
     public function extend(Environment $twig, ContainerInterface $container): Environment
     {
-        $shopUiTwigExtension = $this->getFactory()->createShopUiTwigExtension();
-        $twig->addExtension($shopUiTwigExtension);
+        $twig->addExtension($this->getFactory()->createShopUiTwigExtension());
+        $twig->addFunction($this->getFactory()->createConfigurationValueTwigFunction());
+        $twig->addFunction($this->getFactory()->createConfigurationValuesTwigFunction());
 
         return $twig;
     }

@@ -1,17 +1,26 @@
+@use 'sass:color';
+@use 'sass:meta';
+
 /**
- * Wrapper function for the darken sass function with a default degree parameter.
- * @param {Color} $setting-color
+ * @param {Color|String} $value
  * @param {Number} $degree [10]
  */
-@function helper-color-dark($setting-color, $degree: 10) {
-    @return darken($setting-color, $degree);
+@function helper-color-dark($value, $degree: 10) {
+    @if meta.type-of($value) == 'color' {
+        @return color.adjust($value, $lightness: -$degree, $space: hsl);
+    }
+
+    @return unquote('color-mix(in srgb, #{$value} #{100 - $degree}%, black)');
 }
 
 /**
- * Wrapper function for the lighten sass function with a default degree parameter.
- * @param {Color} $setting-color
+ * @param {Color|String} $value
  * @param {Number} $degree [10]
  */
-@function helper-color-light($setting-color, $degree: 35) {
-    @return lighten($setting-color, $degree);
+@function helper-color-light($value, $degree: 35) {
+    @if meta.type-of($value) == 'color' {
+        @return color.adjust($value, $lightness: $degree, $space: hsl);
+    }
+
+    @return unquote('color-mix(in srgb, #{$value} #{100 - $degree}%, white)');
 }

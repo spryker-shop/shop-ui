@@ -4,7 +4,7 @@
         @include helper-visibility-invisible;
         @include helper-effect-transition(max-height opacity visibility, 500ms);
         max-height: 0;
-        background-color: rgba(helper-color-light($setting-color-main), 0.97);
+        background-color: color-mix(in srgb, color-mix(in srgb, #{$setting-color-main} 65%, white) 97%, transparent);
         cursor: pointer;
         overflow-y: hidden;
 

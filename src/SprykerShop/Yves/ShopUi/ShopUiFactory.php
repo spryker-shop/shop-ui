@@ -7,6 +7,7 @@
 
 namespace SprykerShop\Yves\ShopUi;
 
+use Spryker\Shared\Twig\TwigFunctionProvider;
 use Spryker\Yves\Kernel\AbstractFactory;
 use SprykerShop\Yves\ShopUi\Dependency\Client\ShopUiToLocaleClientInterface;
 use SprykerShop\Yves\ShopUi\Dependency\Client\ShopUiToTwigClientInterface;
@@ -19,10 +20,13 @@ use SprykerShop\Yves\ShopUi\Filter\NumberFormatterTwigFilterFactoryInterface;
 use SprykerShop\Yves\ShopUi\Form\Type\Extension\SanitizeXssTypeExtension;
 use SprykerShop\Yves\ShopUi\Twig\Assets\AssetsUrlProvider;
 use SprykerShop\Yves\ShopUi\Twig\Assets\AssetsUrlProviderInterface;
+use SprykerShop\Yves\ShopUi\Twig\ConfigurationValuesTwigFunctionProvider;
+use SprykerShop\Yves\ShopUi\Twig\ConfigurationValueTwigFunctionProvider;
 use SprykerShop\Yves\ShopUi\Twig\ShopUiTwigExtension;
 use SprykerShop\Yves\ShopUi\TwigFunction\NumberFormatterTwigFunctionFactory;
 use SprykerShop\Yves\ShopUi\TwigFunction\NumberFormatterTwigFunctionFactoryInterface;
 use Symfony\Component\Form\FormTypeExtensionInterface;
+use Twig\TwigFunction;
 
 /**
  * @method \SprykerShop\Yves\ShopUi\ShopUiConfig getConfig()
@@ -94,5 +98,41 @@ class ShopUiFactory extends AbstractFactory
     public function getUtilSanitizeXssService(): ShopUiToUtilSanitizeXssServiceInterface
     {
         return $this->getProvidedDependency(ShopUiDependencyProvider::SERVICE_UTIL_SANITIZE_XSS);
+    }
+
+    public function createConfigurationValueTwigFunctionProvider(): TwigFunctionProvider
+    {
+        return new ConfigurationValueTwigFunctionProvider(
+            $this->getConfig(),
+        );
+    }
+
+    public function createConfigurationValueTwigFunction(): TwigFunction
+    {
+        $functionProvider = $this->createConfigurationValueTwigFunctionProvider();
+
+        return new TwigFunction(
+            $functionProvider->getFunctionName(),
+            $functionProvider->getFunction(),
+            $functionProvider->getOptions(),
+        );
+    }
+
+    public function createConfigurationValuesTwigFunctionProvider(): TwigFunctionProvider
+    {
+        return new ConfigurationValuesTwigFunctionProvider(
+            $this->getConfig(),
+        );
+    }
+
+    public function createConfigurationValuesTwigFunction(): TwigFunction
+    {
+        $functionProvider = $this->createConfigurationValuesTwigFunctionProvider();
+
+        return new TwigFunction(
+            $functionProvider->getFunctionName(),
+            $functionProvider->getFunction(),
+            $functionProvider->getOptions(),
+        );
     }
 }

@@ -1,0 +1,125 @@
+# yaml-language-server: $schema=../../../../Spryker/Configuration/resources/configuration/configuration-schema-v1.json
+features:
+    - key: theme
+      name: Theme
+      description: Visual branding settings for Storefront, Back Office, and Merchant Portal
+      enabled: true
+      order: 10
+      tabs:
+          - key: storefront
+            name: Storefront
+            icon: storefront
+            description: Storefront theme colors and custom CSS
+            order: 2
+            enabled: true
+            groups:
+                - key: colors
+                  name: Storefront Colors
+                  scopes:
+                      - global
+                      - store
+                  enabled: true
+                  settings:
+                      - key: background_brand_primary
+                        name: Theme Main Color
+                        description: Primary brand color used across the storefront
+                        type: color
+                        default_value: '#00bebe'
+                        scopes:
+                            - global
+                            - store
+                        enabled: true
+                        secret: false
+                        storefront: true
+                        constraints:
+                            - type: regex
+                              message: 'Must be a valid hex color (e.g. #00bebe)'
+                              options:
+                                  pattern: '^#[0-9A-Fa-f]{6}$'
+
+                      - key: background_brand_subtle
+                        name: Theme Alternative Color
+                        description: Secondary brand color for accents and highlights
+                        type: color
+                        default_value: '#eb553c'
+                        scopes:
+                            - global
+                            - store
+                        enabled: true
+                        secret: false
+                        storefront: true
+                        constraints:
+                            - type: regex
+                              message: 'Must be a valid hex color (e.g. #eb553c)'
+                              options:
+                                  pattern: '^#[0-9A-Fa-f]{6}$'
+
+                - key: custom_css
+                  name: Custom CSS
+                  scopes:
+                      - global
+                      - store
+                  enabled: true
+                  settings:
+                      - key: yves_custom_css
+                        name: Storefront Custom CSS
+                        description: Custom CSS injected into storefront pages. Use with caution — invalid CSS may break page layout.
+                        help_text: 'Enter valid CSS rules. Example: .header { background-color: #333; }'
+                        type: text
+                        default_value: ''
+                        scopes:
+                            - global
+                            - store
+                        enabled: true
+                        secret: false
+                        storefront: true
+                        constraints:
+                            - type: max
+                              message: 'Custom CSS must not exceed 50000 characters'
+                              options:
+                                  max: 50000
+                        sanitize_xss: {}
+
+          - key: logos
+            name: Logos
+            icon: image
+            description: Logo images for all application contexts
+            order: 1
+            enabled: true
+            groups:
+                - key: logos
+                  name: Logos
+                  scopes:
+                      - global
+                      - store
+                  enabled: true
+                  settings:
+                      - key: yves_logo_url
+                        name: Storefront Logo
+                        description: Logo image displayed in the storefront header
+                        type: file
+                        file_upload:
+                            storage_name: 'storefront-media'
+                            allowed_mime_types:
+                                - 'image/png'
+                                - 'image/jpeg'
+                                - 'image/gif'
+                                - 'image/webp'
+                                - 'image/svg+xml'
+                            allowed_extensions:
+                                - '.png'
+                                - '.jpg'
+                                - '.jpeg'
+                                - '.gif'
+                                - '.webp'
+                                - '.svg'
+                            max_file_size: '10M'
+                            recommended_width_px: 186
+                            recommended_height_px: 50
+                        default_value: ''
+                        scopes:
+                            - global
+                            - store
+                        enabled: true
+                        secret: false
+                        storefront: true
