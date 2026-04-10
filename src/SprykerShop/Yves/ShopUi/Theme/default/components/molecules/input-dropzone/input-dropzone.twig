@@ -34,14 +34,16 @@
                             },
                         } only %}
 
-                        <span>
-                            {{ 'general.fileUpload.description' | trans({
-                                '%amount%': attributes['max-count'],
-                                '%size%': attributes['max-total-size'],
-                                '%format%': attributes.accept | split('.')
-                                    | reduce((carry, format) => "#{format | upper}", ''),
-                            }) }}
-                        </span>
+                        {% if attributes['max-count'] and attributes['max-total-size'] and attributes.accept %}
+                            <span>
+                                {{ 'general.fileUpload.description' | trans({
+                                    '%amount%': attributes['max-count'],
+                                    '%size%': attributes['max-total-size'],
+                                    '%format%': attributes.accept | split('.')
+                                        | reduce((carry, format) => "#{format | upper}", ''),
+                                }) }}
+                            </span>
+                        {% endif %}
                     </div>
                 {% endblock %}
 

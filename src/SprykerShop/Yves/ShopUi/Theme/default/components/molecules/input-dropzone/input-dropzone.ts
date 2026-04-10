@@ -45,9 +45,10 @@ export default class InputDropzone extends Component {
                 break;
             }
 
-            const isFileTypeAllowed = file.type.split('/').some((type) => this.acceptedFormats.includes(type));
+            const isFileTypeAllowed =
+                !this.acceptedFormats || file.type.split('/').some((type) => this.acceptedFormats.includes(type));
 
-            if (!isFileTypeAllowed || !file.type) {
+            if (!isFileTypeAllowed) {
                 // eslint-disable-next-line no-console
                 console.warn(`The file ${file.name} has an unsupported format`);
                 continue;
@@ -80,7 +81,7 @@ export default class InputDropzone extends Component {
     }
 
     protected get acceptedFormats(): string {
-        return this.getAttribute('accept');
+        return this.input.accept;
     }
 
     protected get maxCount(): number {
