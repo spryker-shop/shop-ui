@@ -7,7 +7,7 @@
  */
 @function helper-color-dark($value, $degree: 10) {
     @if meta.type-of($value) == 'color' {
-        @return color.adjust($value, $lightness: -$degree, $space: hsl);
+        @return darken($value, $degree);
     }
 
     @return unquote('color-mix(in srgb, #{$value} #{100 - $degree}%, black)');
@@ -19,7 +19,7 @@
  */
 @function helper-color-light($value, $degree: 35) {
     @if meta.type-of($value) == 'color' {
-        @return color.adjust($value, $lightness: $degree, $space: hsl);
+        @return lighten($value, $degree);
     }
 
     @return unquote('color-mix(in srgb, #{$value} #{100 - $degree}%, white)');
