@@ -78,7 +78,8 @@ features:
                               message: 'Custom CSS must not exceed 50000 characters'
                               options:
                                   max: 50000
-                        sanitize_xss: {}
+                        sanitize_xss:
+                            allow_safe_elements: true
 
           - key: logos
             name: Logos
