@@ -124,6 +124,12 @@
                 'is-open': data.isOverlayOpen,
             },
         } only %}
+
+        {% include molecule('traceable-events-google-analytics', 'GoogleAnalytics') ignore missing with {
+            data: {
+                gtagId: configurationValue('google_analytics:storefront:tracking:measurement_id') ?? null,
+            },
+        } only %}
     {% endblock %}
 
     {% block traceableEvent %}
@@ -190,6 +196,10 @@
                         },
                     ],
                 },
+                {
+                    event: 'SEARCH_EVENT',
+                    name: 'search-results',
+                }
             ],
             data: {
                 currency: currency | spaceless,

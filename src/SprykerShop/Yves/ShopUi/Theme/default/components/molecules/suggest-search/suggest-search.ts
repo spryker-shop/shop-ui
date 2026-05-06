@@ -4,6 +4,11 @@ import AjaxProvider from '../../../components/molecules/ajax-provider/ajax-provi
 import debounce from 'lodash-es/debounce';
 import throttle from 'lodash-es/throttle';
 
+export interface SPRYKER_SEARCH_RESULTS {
+    searchTerm: string;
+    resultsCount: number;
+}
+
 export default class SuggestSearch extends Component {
     /**
      * The search input element.
@@ -99,6 +104,17 @@ export default class SuggestSearch extends Component {
             this.setHintValue('');
             this.hideSugestions();
         }
+
+        this.dispatchSearchResultsEvent(suggestQuery);
+    }
+
+    protected dispatchSearchResultsEvent(suggestQuery: string): void {
+        const detail: Partial<SPRYKER_SEARCH_RESULTS> = {
+            searchTerm: suggestQuery,
+            resultsCount: this.navigation.length || 0,
+        };
+
+        document.dispatchEvent(new CustomEvent<Partial<SPRYKER_SEARCH_RESULTS>>('search-results', { detail }));
     }
 
     protected onInputKeyDown(event: KeyboardEvent): void {
@@ -254,10 +270,12 @@ export default class SuggestSearch extends Component {
         this.ajaxProvider.queryParams.set('q', suggestQuery);
 
         const response = await this.ajaxProvider.fetch(suggestQuery);
-        const suggestions = JSON.parse(response).suggestion;
+        const parsedResponse = JSON.parse(response);
+        const suggestions = parsedResponse.suggestion;
 
         this.suggestionsContainer.innerHTML = suggestions;
-        this.hint = JSON.parse(response).completion;
+        this.hint = parsedResponse.completion;
+
         if (suggestions) {
             this.showSugestions();
         }
