@@ -127,7 +127,7 @@
 
         {% include molecule('traceable-events-google-analytics', 'GoogleAnalytics') ignore missing with {
             data: {
-                gtagId: configurationValue('google_analytics:storefront:tracking:measurement_id') ?? null,
+                gtagId: configurationValue('google_analytics:storefront:tracking:measurement_id') | default(null),
             },
         } only %}
     {% endblock %}
