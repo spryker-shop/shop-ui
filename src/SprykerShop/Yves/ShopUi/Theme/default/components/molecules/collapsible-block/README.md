@@ -1,0 +1,1 @@
+A lightweight, accessible molecule built on the native HTML <details> element. Renders a collapsible box with zero JavaScript dependency, leveraging built-in browser behavior for toggle functionality.

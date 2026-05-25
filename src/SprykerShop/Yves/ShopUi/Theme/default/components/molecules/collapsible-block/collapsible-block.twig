@@ -1,0 +1,35 @@
+{% extends model('component') %}
+
+{% define config = {
+    name: 'collapsible-block',
+    tag: 'details',
+}%}
+
+{% define data = {
+    title: '',
+    isOpen: false,
+    content: '',
+} %}
+
+{% define attributes = {
+    open: data.isOpen ? 'open' : null,
+} %}
+
+{% block body %}
+    {% set headerClass = config.name ~ '__header' %}
+    {% set contentWrapperClass = config.name ~ '__content' %}
+
+    {% block title %}
+        <summary class="{{ headerClass }}" data-qa="{{ config.name }}__header">
+            {{ data.title }}
+        </summary>
+    {% endblock %}
+
+    {% block contentWrapper %}
+        <div class="{{ contentWrapperClass }}" data-qa="{{ config.name }}__content">
+            {% block content %}
+                {{ data.content | raw }}
+            {% endblock %}
+        </div>
+    {% endblock %}
+{% endblock %}

@@ -1,0 +1,3 @@
+@include helper-import(molecule, quick-order-image-to-cart) {
+    @include shop-ui-collapsible-block();
+}

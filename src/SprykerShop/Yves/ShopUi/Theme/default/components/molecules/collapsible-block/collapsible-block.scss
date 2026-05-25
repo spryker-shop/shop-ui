@@ -1,0 +1,46 @@
+@use 'sass:map';
+@mixin shop-ui-collapsible-block($name: '.collapsible-block') {
+    #{$name} {
+        border: 1px solid $setting-color-lighter;
+
+        &[open] {
+            #{$name}__header::after {
+                transform: rotate(225deg);
+            }
+        }
+
+        &__header {
+            @include helper-font-size('default');
+            @include helper-font-weight('bold');
+
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: map.get($setting-spacing, 'default') map.get($setting-spacing, 'big');
+            cursor: pointer;
+
+            &::after {
+                content: '';
+                display: inline-block;
+                width: 0.5rem;
+                height: 0.5rem;
+                border-right: 2px solid currentColor;
+                border-bottom: 2px solid currentColor;
+                transform: rotate(45deg);
+                transition: transform 0.3s ease;
+            }
+
+            &::-webkit-details-marker {
+                display: none;
+            }
+        }
+
+        &__content {
+            border-top: 1px solid $setting-color-lighter;
+            padding: map.get($setting-spacing, 'default') map.get($setting-spacing, 'big');
+        }
+
+        @content;
+    }
+}
