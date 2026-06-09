@@ -104,14 +104,16 @@ export default class SuggestSearch extends Component {
             this.setHintValue('');
             this.hideSugestions();
         }
-
-        this.dispatchSearchResultsEvent(suggestQuery);
     }
 
     protected dispatchSearchResultsEvent(suggestQuery: string): void {
+        if (!this.navigation) {
+            return;
+        }
+
         const detail: Partial<SPRYKER_SEARCH_RESULTS> = {
             searchTerm: suggestQuery,
-            resultsCount: this.navigation.length || 0,
+            resultsCount: this.navigation.length,
         };
 
         document.dispatchEvent(new CustomEvent<Partial<SPRYKER_SEARCH_RESULTS>>('search-results', { detail }));
@@ -278,6 +280,7 @@ export default class SuggestSearch extends Component {
 
         if (suggestions) {
             this.showSugestions();
+            this.dispatchSearchResultsEvent(suggestQuery);
         }
         if (this.hint) {
             this.updateHintInput();
