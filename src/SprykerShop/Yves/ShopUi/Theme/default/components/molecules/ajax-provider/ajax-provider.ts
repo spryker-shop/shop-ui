@@ -43,6 +43,7 @@ export default class AjaxProvider extends Component {
      */
     readonly xhr: XMLHttpRequest;
     protected xhrStatusSuccessOk = 200;
+    protected xhrStatusUnauthorized = 401;
     protected removeListeners: () => void;
 
     constructor() {
@@ -50,6 +51,7 @@ export default class AjaxProvider extends Component {
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         this.removeListeners = () => {};
         this.xhr = new XMLHttpRequest();
+        this.headers.set('X-Requested-With', 'XMLHttpRequest');
     }
 
     protected readyCallback(): void {}
@@ -131,6 +133,18 @@ export default class AjaxProvider extends Component {
     protected onRequestLoad(resolve: Resolve, reject: Reject): void {
         this.isFetchingRequest = false;
         this.dispatchCustomEvent(EVENT_FETCHED);
+        if (this.xhr.status === this.xhrStatusUnauthorized) {
+            try {
+                const data = JSON.parse(this.xhr.responseText);
+                if (data.redirect) {
+                    window.location.href = data.redirect;
+                }
+            } catch {
+                // non-JSON 401 — fall through to generic error handler
+            }
+
+            return;
+        }
 
         if (this.xhr.status !== this.xhrStatusSuccessOk) {
             reject(new Error(`${this.method} ${this.xhr.status} ${this.url} server error`));
