@@ -278,6 +278,8 @@ export default class SuggestSearch extends Component {
         this.suggestionsContainer.innerHTML = suggestions;
         this.hint = parsedResponse.completion;
 
+        this.navigation = this.getNavigation();
+
         if (suggestions) {
             this.showSugestions();
             this.dispatchSearchResultsEvent(suggestQuery);
@@ -288,7 +290,6 @@ export default class SuggestSearch extends Component {
         if (this.hint === null || !this.getSearchValue()) {
             this.setHintValue('');
         }
-        this.navigation = this.getNavigation();
         this.updateNavigation();
     }
 
