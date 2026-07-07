@@ -30,6 +30,9 @@
     {% set iconModifiers = [] %}
 
     {% block button %}
+        {# The click handler is attached only when the webcomponent initializes; render the button
+           disabled until then so early clicks cannot be silently lost. #}
+        {% set isPermanentlyDisabled = data.extraAttributes.disabled ?? false %}
         <button
             class="{{ config.name }}__button {{ config.jsName }}__button {{ data.buttonClasses }} {{ data.buttonExtraClasses }}"
             type="button"
@@ -39,6 +42,8 @@
             data-csrf-token="{{ data.csrfToken }}"
             data-quantity="{{ data.quantity }}"
             data-separate-product="{{ data.separateProduct }}"
+            disabled
+            {% if not isPermanentlyDisabled %}data-enable-on-init="true"{% endif %}
             {{ component.renderAttributes(data.extraAttributes) }}
         >
             {% block buttonContent %}
