@@ -11,18 +11,6 @@ export default class AjaxAddToCart extends Component {
     protected init(): void {
         this.button = <HTMLButtonElement>this.getElementsByClassName(`${this.jsName}__button`)[0];
         this.mapEvents();
-        this.enableButton();
-    }
-
-    // The button is server-rendered disabled so that clicks arriving before the click handler
-    // is attached cannot be silently lost; it becomes clickable only once the handler is live.
-    protected enableButton(): void {
-        if (!this.button.hasAttribute('data-enable-on-init')) {
-            return;
-        }
-
-        this.button.disabled = false;
-        this.button.removeAttribute('data-enable-on-init');
     }
 
     protected mapEvents(): void {
