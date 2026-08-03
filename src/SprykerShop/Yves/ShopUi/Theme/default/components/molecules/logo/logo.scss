@@ -1,0 +1,9 @@
+@mixin shop-ui-logo($name: '.logo') {
+    #{$name} {
+        &__image {
+            max-height: 3.125rem;
+        }
+
+        @content;
+    }
+}

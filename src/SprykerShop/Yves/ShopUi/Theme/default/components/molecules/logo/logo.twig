@@ -29,7 +29,7 @@
                 </g>
             </svg>
         {% else %}
-            <img {{component.renderAttributes(attributes)}}>
+            <img class="{{ config.name }}__image" {{ component.renderAttributes(attributes) }}>
         {% endif %}
     </a>
 {% endblock %}
