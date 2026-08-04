@@ -34,13 +34,11 @@
         {% if data.withSeparators %}<li class="menu__separator"></li>{% endif %}
         <li class="menu__item">
             {% widget 'PriceModeSwitcherWidget' only %}
-            {% elsewidget 'PriceModeSwitcherWidgetPlugin' only %} {# @deprecated Use PriceModeSwitcherWidget instead. #}
             {% endwidget %}
         </li>
         {% if data.withSeparators %}<li class="menu__separator"></li>{% endif %}
         <li class="menu__item">
             {%- widget 'CurrencyWidget' only -%}
-            {%- elsewidget 'CurrencyWidgetPlugin' only -%} {# @deprecated Use CurrencyWidget instead. #}
             {%- endwidget -%}
         </li>
         {% if data.withSeparators %}<li class="menu__separator"></li>{% endif %}
@@ -50,16 +48,10 @@
                 data.queryString,
                 data.requestUri
             ] only %}
-            {% elsewidget 'LanguageSwitcherWidgetPlugin' args [
-                data.pathInfo,
-                data.queryString,
-                data.requestUri
-            ] only %} {# @deprecated Use LanguageSwitcherWidget instead. #}
             {% endwidget %}
         </li>
         <li class="menu__item">
             {% widget 'BusinessOnBehalfStatusWidget' only %}
-            {% elsewidget 'DisplayOnBehalfBusinessWidgetPlugin' only %} {# @deprecated Use BusinessOnBehalfStatusWidget instead. #}
             {% endwidget %}
         </li>
         {% if data.withSeparators %}<li class="menu__separator"></li>{% endif %}
@@ -81,7 +73,6 @@
                         isAjaxMode: data.isAjaxMode,
                     },
                 } only %}
-                {% elsewidget 'MiniCartWidgetPlugin' args [cartQuantity] only %} {# @deprecated Use MiniCartWidget instead. #}
                 {% nowidget %}
                     {% include molecule('cart-counter') with {
                         data: {
@@ -111,21 +102,10 @@
                         </li>
                         {% if withSeparators %}<li class="menu__separator"></li>{% endif %}
                     {% endblock %}
-                {% elsewidget 'ShoppingListWidgetPlugin' with {withSeparators: data.withSeparators} only %} {# @deprecated Use ShoppingListNavigationMenuWidget instead. #}
-                    {% block body %}
-                        <li class="menu__item menu__item--has-children-dropdown">
-                            {{ parent() }}
-                        </li>
-                        {% if withSeparators %}<li class="menu__separator"></li>{% endif %}
-                    {% endblock %}
                 {% endwidget %}
                 <li class="menu__item"><a href="{{ url('customer/overview') }}">{{ 'customer.profile'|trans }}</a></li>
 
                 {% widget 'CompanyMenuItemWidget' only %}
-                    {% block body %}
-                        <li class="menu__item">{% apply spaceless %}{{ parent() }}{% endapply %}</li>
-                    {% endblock %}
-                {% elsewidget 'MenuItemCompanyWidgetPlugin' only %} {# @deprecated Use CompanyMenuItemWidget instead. #}
                     {% block body %}
                         <li class="menu__item">{% apply spaceless %}{{ parent() }}{% endapply %}</li>
                     {% endblock %}

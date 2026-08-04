@@ -1,0 +1,8 @@
+@use 'sass:math';
+@use 'ShopUi/styles/shared' as *;
+
+@mixin basic-typography {
+    body {
+        color: $setting-color-main;
+    }
+}

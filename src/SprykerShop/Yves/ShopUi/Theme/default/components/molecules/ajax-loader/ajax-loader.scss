@@ -1,3 +1,5 @@
+@use 'sass:meta';
+
 @mixin shop-ui-ajax-loader($name: '.ajax-loader') {
     #{$name} {
         @include helper-effect-transition();
@@ -9,6 +11,10 @@
         padding: 0.5rem;
         background-color: rgba($setting-color-lighter, 0.5);
         z-index: $setting-zi-ajax-loader;
+
+        @if meta.mixin-exists(shop-ui-ajax-loader-base-hook) {
+            @include shop-ui-ajax-loader-base-hook;
+        }
 
         &__spinner {
             animation-name: spin-to;

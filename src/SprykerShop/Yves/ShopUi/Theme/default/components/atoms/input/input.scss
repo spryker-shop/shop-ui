@@ -1,9 +1,16 @@
+@use 'sass:map';
+@use 'sass:meta';
+
 @mixin shop-ui-input($name: '.input') {
     #{$name} {
         @include helper-effect-transition(border-color);
         display: inline-block;
         padding: 0.25rem 0.5rem;
         border: 1px solid $setting-color-input-border;
+
+        @if meta.mixin-exists(shop-ui-input-base-hook) {
+            @include shop-ui-input-base-hook;
+        }
 
         &:focus {
             border-color: $setting-color-input-border-focus;
@@ -24,7 +31,7 @@
         }
 
         &--error {
-            border-color: map-get($setting-color-actions, alert);
+            border-color: map.get($setting-color-actions, alert);
         }
 
         &[disabled],

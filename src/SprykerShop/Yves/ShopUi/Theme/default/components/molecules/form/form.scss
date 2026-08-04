@@ -1,7 +1,13 @@
+@use 'sass:meta';
+
 $shop-ui-form-field-margin: 0.5rem;
 
 @mixin shop-ui-form($name: '.form') {
     #{$name} {
+        @if meta.mixin-exists(shop-ui-form-base-hook) {
+            @include shop-ui-form-base-hook;
+        }
+
         & & {
             padding-left: $shop-ui-form-field-margin;
             padding-right: $shop-ui-form-field-margin;

@@ -1,11 +1,16 @@
+@use 'sass:list';
+@use 'sass:map';
+@use '../settings/breakpoint' as *;
+@use '../settings/grid' as *;
+
 /**
  * Returns 0 or the first value from the $edges list.
  * @param {List} $edges [$setting-breakpoints] List length must be less than or equal to 2.
  * @return {Base}
  */
 @function helper-breakpoint-edge-min($edges) {
-    @if length($edges) > 0 {
-        @return nth($edges, 1);
+    @if list.length($edges) > 0 {
+        @return list.nth($edges, 1);
     }
 
     @return 0;
@@ -17,8 +22,8 @@
  * @return {Base}
  */
 @function helper-breakpoint-edge-max($edges) {
-    @if length($edges) > 1 {
-        @return nth($edges, 2);
+    @if list.length($edges) > 1 {
+        @return list.nth($edges, 2);
     }
 
     @return null;
@@ -65,7 +70,7 @@
  * @content Extends mixin with properties for media query.
  */
 @mixin helper-breakpoint($min-bp, $max-bp: null) {
-    $edges-min: map-get($setting-breakpoints, $min-bp);
+    $edges-min: map.get($setting-breakpoints, $min-bp);
     $edge-min: helper-breakpoint-edge-min($edges-min);
 
     @if $max-bp == null {
@@ -73,7 +78,7 @@
             @content;
         }
     } @else {
-        $edges-max: map-get($setting-breakpoints, $max-bp);
+        $edges-max: map.get($setting-breakpoints, $max-bp);
         $edge-max: helper-breakpoint-edge-max($edges-max);
 
         @if $edge-max == null {

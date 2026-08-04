@@ -1,6 +1,12 @@
+@use 'sass:meta';
+
 @mixin shop-ui-breadcrumb-step($name: '.breadcrumb-step') {
     #{$name} {
         display: inline-block;
+
+        @if meta.mixin-exists(shop-ui-breadcrumb-step-base-hook) {
+            @include shop-ui-breadcrumb-step-base-hook;
+        }
 
         &__separator {
             margin-left: 0.25rem;

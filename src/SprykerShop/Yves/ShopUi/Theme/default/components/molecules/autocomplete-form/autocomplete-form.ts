@@ -56,7 +56,7 @@ export default class AutocompleteForm extends Component {
     protected injectorsExtraQueryValueList: HTMLSelectElement[] | HTMLInputElement[];
     protected extraQueryValues = new Map();
 
-    protected readyCallback(): void {
+    protected init(): void {
         this.ajaxProvider = <AjaxProvider>this.getElementsByClassName(`${this.jsName}__provider`)[0];
         this.textInput = <HTMLInputElement>this.getElementsByClassName(`${this.jsName}__text-input`)[0];
         this.valueInput = <HTMLInputElement>this.getElementsByClassName(`${this.jsName}__value-input`)[0];
@@ -164,10 +164,7 @@ export default class AutocompleteForm extends Component {
 
         await this.ajaxProvider.fetch();
         this.suggestionItems = <HTMLElement[]>(
-            Array.from(
-                this.suggestionsContainer.getElementsByClassName(this.suggestedItemClassName) ||
-                    this.suggestionsContainer.querySelectorAll(this.suggestedItemSelector),
-            )
+            Array.from(this.suggestionsContainer.getElementsByClassName(this.suggestedItemClassName))
         );
         this.lastSelectedItem = this.suggestionItems[0];
         this.mapSuggestionItemsEvents();
@@ -251,7 +248,7 @@ export default class AutocompleteForm extends Component {
      * Gets the css query selector of the selected suggestion items.
      */
     get selectedInputClass(): string {
-        return `${this.suggestedItemClassName}--selected` || `${this.suggestedItemSelector}--selected`.substr(1);
+        return `${this.suggestedItemClassName}--selected`;
     }
 
     /**
@@ -295,15 +292,6 @@ export default class AutocompleteForm extends Component {
      */
     get valueAttributeName(): string {
         return this.getAttribute('value-attribute-name');
-    }
-
-    /**
-     * Gets the css query selector of the suggestion items.
-     *
-     * @deprecated Use suggestedItemClassName() instead.
-     */
-    get suggestedItemSelector(): string {
-        return this.getAttribute('suggested-item-selector');
     }
 
     protected get suggestedItemClassName(): string {

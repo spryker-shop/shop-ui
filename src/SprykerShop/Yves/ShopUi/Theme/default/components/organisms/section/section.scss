@@ -1,6 +1,12 @@
+@use 'sass:meta';
+
 @mixin shop-ui-section($name: '.section') {
     #{$name} {
         padding: 1rem 0;
+
+        @if meta.mixin-exists(shop-ui-section-base-hook) {
+            @include shop-ui-section-base-hook;
+        }
 
         @include helper-breakpoint(lg) {
             padding: 2rem 0;

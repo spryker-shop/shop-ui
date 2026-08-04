@@ -1,0 +1,7 @@
+@mixin a-panel {
+    @include b-button;
+
+    .panel {
+        color: $setting-color-main;
+    }
+}

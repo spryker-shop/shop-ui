@@ -1,8 +1,14 @@
+@use 'sass:meta';
+
 @mixin shop-ui-endless-scroll($name: '.endless-scroll') {
     #{$name} {
         display: flex;
         max-height: 100%;
         overflow: hidden;
+
+        @if meta.mixin-exists(shop-ui-endless-scroll-base-hook) {
+            @include shop-ui-endless-scroll-base-hook;
+        }
 
         &__scroll-container {
             overflow-y: auto;

@@ -1,5 +1,11 @@
+@use 'sass:meta';
+
 @mixin shop-ui-jumbotron($name: '.jumbotron') {
     #{$name} {
+        @if meta.mixin-exists(shop-ui-jumbotron-base-hook) {
+            @include shop-ui-jumbotron-base-hook;
+        }
+
         &__container {
             height: 10rem;
             /* stylelint-disable function-comma-newline-after */

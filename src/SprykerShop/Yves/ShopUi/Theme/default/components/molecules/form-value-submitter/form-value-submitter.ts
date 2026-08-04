@@ -5,8 +5,6 @@ export default class FormValueSubmitter extends Component {
     protected triggers: HTMLElement[];
     protected target: HTMLInputElement;
 
-    protected readyCallback(): void {}
-
     protected init(): void {
         this.form = <HTMLFormElement>document.getElementsByClassName(this.formClassName)[0];
         this.triggers = <HTMLElement[]>Array.from(document.getElementsByClassName(this.triggerClassName));

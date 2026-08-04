@@ -10,8 +10,6 @@ export default class FormattedNumberInput extends Component {
     protected autoNumericConfig: AutoNumeric.Options;
     protected inputChangeEvent: CustomEvent = new CustomEvent(EVENT_FORMATTED_NUMBER);
 
-    protected readyCallback(): void {}
-
     protected init(): void {
         this.input = <HTMLInputElement>this.getElementsByClassName(`${this.jsName}__input`)[0];
         this.hiddenInput = <HTMLInputElement>this.getElementsByClassName(`${this.jsName}__hidden-input`)[0];

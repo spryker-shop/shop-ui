@@ -1,0 +1,10 @@
+$badge-sizes: (
+    small: 12px,
+);
+
+@mixin my-badge {
+    .badge {
+        font-size: map.get($badge-sizes, small);
+        color: helper-color-shade($setting-color-main);
+    }
+}

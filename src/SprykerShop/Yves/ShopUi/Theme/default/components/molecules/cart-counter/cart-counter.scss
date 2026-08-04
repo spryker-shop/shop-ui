@@ -1,8 +1,15 @@
+@use 'sass:map';
+@use 'sass:meta';
+
 $shop-ui-cart-counter-quantity-size: 1.5rem;
 
 @mixin shop-ui-cart-counter($name: '.cart-counter') {
     #{$name} {
         display: inline-block;
+
+        @if meta.mixin-exists(shop-ui-cart-counter-base-hook) {
+            @include shop-ui-cart-counter-base-hook;
+        }
 
         &__quantity {
             @include helper-font-size(small);
@@ -14,7 +21,7 @@ $shop-ui-cart-counter-quantity-size: 1.5rem;
             color: $setting-color-white;
             text-align: center;
             line-height: $shop-ui-cart-counter-quantity-size;
-            margin-left: map-get($setting-spacing, 'small');
+            margin-left: map.get($setting-spacing, 'small');
 
             &--hidden {
                 display: none;

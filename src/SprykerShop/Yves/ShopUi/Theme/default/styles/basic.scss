@@ -1,4 +1,4 @@
-@import 'basics/reset';
-@import 'basics/typography';
-@import 'basics/grid';
-@import 'basics/animation';
+@forward 'basics/reset';
+@forward 'basics/typography';
+@forward 'basics/grid';
+@forward 'basics/animation';

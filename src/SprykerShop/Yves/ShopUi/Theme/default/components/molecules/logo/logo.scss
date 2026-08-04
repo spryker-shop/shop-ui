@@ -1,5 +1,11 @@
+@use 'sass:meta';
+
 @mixin shop-ui-logo($name: '.logo') {
     #{$name} {
+        @if meta.mixin-exists(shop-ui-logo-base-hook) {
+            @include shop-ui-logo-base-hook;
+        }
+
         &__image {
             max-height: 3.125rem;
         }

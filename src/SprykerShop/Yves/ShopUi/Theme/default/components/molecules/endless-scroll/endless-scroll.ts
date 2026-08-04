@@ -12,8 +12,6 @@ export default class EndlessScroll extends Component {
     protected isFetching = false;
     protected containerScrollHandler: () => void;
 
-    protected readyCallback(): void {}
-
     protected init(): void {
         this.ajaxProvider = <AjaxProvider>this.getElementsByClassName(`${this.jsName}__ajax-provider`)[0];
         this.scrollContainer = <HTMLElement>this.getElementsByClassName(`${this.jsName}__scroll-container`)[0];

@@ -1,5 +1,12 @@
+@use 'sass:map';
+@use 'sass:meta';
+
 @mixin shop-ui-list($name: '.list') {
     #{$name} {
+        @if meta.mixin-exists(shop-ui-list-base-hook) {
+            @include shop-ui-list-base-hook;
+        }
+
         &__item {
             display: block;
             margin-bottom: 0.25rem;
@@ -47,7 +54,7 @@
         }
 
         &--alert {
-            color: map-get($setting-color-actions, alert);
+            color: map.get($setting-color-actions, alert);
         }
 
         @content;

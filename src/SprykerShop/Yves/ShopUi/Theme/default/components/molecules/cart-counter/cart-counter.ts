@@ -8,8 +8,6 @@ export const EVENT_UPDATE_CART_QUANTITY = 'updateCartQuantity';
 export default class CartCounter extends Component {
     protected quantity: HTMLElement;
 
-    protected readyCallback(): void {}
-
     protected init(): void {
         this.quantity = <HTMLElement>this.getElementsByClassName(`${this.jsName}__quantity`)[0];
         this.mapEvents();

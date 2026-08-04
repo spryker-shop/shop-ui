@@ -5,8 +5,6 @@ export default class RemoteFormSubmit extends Component {
     protected fieldsContainer: HTMLElement;
     protected submitButton: HTMLButtonElement;
 
-    protected readyCallback(): void {}
-
     protected init(): void {
         if (!this.initialMount) {
             return;

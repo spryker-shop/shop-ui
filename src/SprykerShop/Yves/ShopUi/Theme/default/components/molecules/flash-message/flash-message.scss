@@ -1,3 +1,5 @@
+@use 'sass:meta';
+
 @mixin shop-ui-flash-message($name: '.flash-message') {
     #{$name} {
         @include helper-ui-shadow;
@@ -7,6 +9,10 @@
         background-color: color-mix(in srgb, color-mix(in srgb, #{$setting-color-main} 65%, white) 97%, transparent);
         cursor: pointer;
         overflow-y: hidden;
+
+        @if meta.mixin-exists(shop-ui-flash-message-base-hook) {
+            @include shop-ui-flash-message-base-hook;
+        }
 
         &__message {
             padding: 1rem 0.5rem;
@@ -27,6 +33,10 @@
 }
 
 @mixin shop-ui-flash-message-action($action, $setting-color-action) {
+    @if meta.mixin-exists(shop-ui-flash-message-action-base-hook) {
+        @include shop-ui-flash-message-action-base-hook;
+    }
+
     &--#{$action} {
         background-color: rgba(helper-color-light($setting-color-action), 0.97);
     }

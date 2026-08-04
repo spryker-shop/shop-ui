@@ -17,8 +17,6 @@ export default class SideDrawer extends Component {
     protected eventShowOverlay: CustomEvent<OverlayEventDetail>;
     protected eventHideOverlay: CustomEvent<OverlayEventDetail>;
 
-    protected readyCallback(): void {}
-
     protected init(): void {
         this.triggers = <HTMLElement[]>Array.from(document.getElementsByClassName(this.triggerSelector));
         this.containers = <HTMLElement[]>Array.from(document.getElementsByClassName(this.containerSelector));

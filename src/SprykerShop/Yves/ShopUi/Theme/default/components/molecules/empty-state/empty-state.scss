@@ -1,3 +1,5 @@
+@use 'sass:meta';
+
 @mixin shop-ui-empty-state($name: '.empty-state') {
     #{$name} {
         display: flex;
@@ -8,6 +10,10 @@
         font-size: 1rem;
         max-width: 40rem;
         margin: 2.8rem auto;
+
+        @if meta.mixin-exists(shop-ui-empty-state-base-hook) {
+            @include shop-ui-empty-state-base-hook;
+        }
 
         &__icon {
             width: 5.62rem;

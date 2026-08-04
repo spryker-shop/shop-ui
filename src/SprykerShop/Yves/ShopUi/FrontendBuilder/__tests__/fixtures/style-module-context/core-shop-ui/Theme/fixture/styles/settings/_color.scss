@@ -1,0 +1,4 @@
+@use 'sass:color';
+
+$setting-color-main: color.adjust(#000000, $lightness: 10%);
+$setting-grid-max-width: 1200px;

@@ -54,8 +54,6 @@ export default class AjaxProvider extends Component {
         this.headers.set('X-Requested-With', 'XMLHttpRequest');
     }
 
-    protected readyCallback(): void {}
-
     protected init(): void {
         if (this.fetchOnLoad) {
             this.fetch();

@@ -1,5 +1,11 @@
+@use 'sass:meta';
+
 @mixin shop-ui-collapsible-list($name: '.collapsible-list') {
     #{$name} {
+        @if meta.mixin-exists(shop-ui-collapsible-list-base-hook) {
+            @include shop-ui-collapsible-list-base-hook;
+        }
+
         &__button {
             background-color: $setting-color-transparent;
             color: $setting-color-main;

@@ -1,9 +1,15 @@
+@use 'sass:meta';
+
 $shop-ui-side-drawer-width: 15rem;
 
 @mixin shop-ui-side-drawer($name: '.side-drawer') {
     #{$name} {
         position: relative;
         z-index: $setting-zi-side-drawer;
+
+        @if meta.mixin-exists(shop-ui-side-drawer-base-hook) {
+            @include shop-ui-side-drawer-base-hook;
+        }
 
         &__drawer {
             @include helper-ui-shadow;

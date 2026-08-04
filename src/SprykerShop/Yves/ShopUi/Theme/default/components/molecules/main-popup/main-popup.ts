@@ -20,8 +20,6 @@ export default class MainPopup extends Component {
     protected eventShowOverlay: CustomEvent<OverlayEventDetail>;
     protected eventHideOverlay: CustomEvent<OverlayEventDetail>;
 
-    protected readyCallback(): void {}
-
     protected async init(): Promise<void> {
         this.triggers = <HTMLElement[]>Array.from(document.getElementsByClassName(this.triggerClassName));
         this.overlay = <HTMLElement>document.getElementsByClassName(this.overlayClassName)[0];

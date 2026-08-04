@@ -1,6 +1,12 @@
+@use 'sass:meta';
+
 @mixin shop-ui-card($name: '.card') {
     #{$name} {
         position: relative;
+
+        @if meta.mixin-exists(shop-ui-card-base-hook) {
+            @include shop-ui-card-base-hook;
+        }
 
         &__container {
             position: relative;

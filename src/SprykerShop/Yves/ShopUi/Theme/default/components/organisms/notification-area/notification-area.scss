@@ -1,3 +1,5 @@
+@use 'sass:meta';
+
 @mixin shop-ui-notification-area($name: '.notification-area') {
     #{$name} {
         position: fixed;
@@ -5,6 +7,10 @@
         left: 0;
         right: 0;
         z-index: $setting-zi-notification-area;
+
+        @if meta.mixin-exists(shop-ui-notification-area-base-hook) {
+            @include shop-ui-notification-area-base-hook;
+        }
 
         @content;
     }

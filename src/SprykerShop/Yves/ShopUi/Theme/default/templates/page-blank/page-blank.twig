@@ -10,8 +10,6 @@
     appLocale: app.locale,
 } %}
 
-{# @deprecated variable "isNewFrontendBuildSupported" is deprecated #}
-{% set isNewFrontendBuildSupported = false %}
 {% set isCssLazyLoadSupported = false %}
 {% set viewportUserScaleable = 'no' %}
 
@@ -62,10 +60,6 @@
 
                 <script type="module" src="{{ publicPath('js/yves_default.runtime.js') }}" crossorigin="anonymous"></script>
 
-                {# @deprecated block "esmHeadScripts" is deprecated #}
-                {% block esmHeadScripts %}{% endblock %}
-                {# @deprecated block "legacyHeadScripts" is deprecated #}
-                {% block legacyHeadScripts %}{% endblock %}
 
                 {% widget 'AssetWidget' args ['header'] only %}{% endwidget %}
             {% endblock %}
@@ -83,10 +77,6 @@
                 <script type="module" src="{{ publicPath('js/yves_default.vendor.js') }}" crossorigin="anonymous"></script>
                 <script type="module" src="{{ publicPath('js/yves_default.app.js') }}" crossorigin="anonymous"></script>
 
-                {# @deprecated block "esmFooterScripts" is deprecated #}
-                {% block esmFooterScripts %}{% endblock %}
-                {# @deprecated block "legacyFooterScripts" is deprecated #}
-                {% block legacyFooterScripts %}{% endblock %}
 
                 {%- block styleLazyLoader %}{% endblock -%}
 

@@ -1,0 +1,5 @@
+$setting-color-main: #003399 !default;
+
+@function helper-color-shade($color) {
+    @return $color;
+}

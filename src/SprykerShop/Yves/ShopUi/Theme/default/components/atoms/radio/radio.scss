@@ -1,5 +1,11 @@
+@use 'sass:meta';
+
 @mixin shop-ui-radio($name: '.radio') {
     @include shop-ui-checkbox($name) {
+        @if meta.mixin-exists(shop-ui-radio-base-hook) {
+            @include shop-ui-radio-base-hook;
+        }
+
         &__box,
         &__check {
             border-radius: 100%;

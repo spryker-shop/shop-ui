@@ -1,3 +1,6 @@
+@use 'sass:list';
+@use '../settings/import' as *;
+
 /**
  * Checks parameter on presence in the blacklist of imports setting list.
  * @param {List} $keywords
@@ -7,7 +10,7 @@
     $isBlacklisted: false;
 
     @each $keyword in $keywords {
-        @if index($setting-import-blacklist, $keyword) != null {
+        @if list.index($setting-import-blacklist, $keyword) != null {
             $isBlacklisted: true;
         }
     }

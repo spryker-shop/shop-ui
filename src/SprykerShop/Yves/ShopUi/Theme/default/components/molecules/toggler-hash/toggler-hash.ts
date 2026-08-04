@@ -8,16 +8,10 @@ export default class TogglerHash extends Component {
 
     constructor() {
         super();
-        this.targets = <HTMLElement[]>(
-            Array.from(
-                this.targetClassName
-                    ? document.getElementsByClassName(this.targetClassName)
-                    : document.querySelectorAll(this.targetSelector),
-            )
-        );
+        this.targets = <HTMLElement[]>Array.from(document.getElementsByClassName(this.targetClassName));
     }
 
-    protected readyCallback(): void {
+    protected init(): void {
         this.checkHash();
         this.mapEvents();
     }
@@ -65,14 +59,6 @@ export default class TogglerHash extends Component {
         return this.getAttribute('trigger-hash');
     }
 
-    /**
-     * Gets a querySelector of the target element.
-     *
-     * @deprecated Use targetClassName() instead.
-     */
-    get targetSelector(): string {
-        return this.getAttribute('target-selector');
-    }
     protected get targetClassName(): string {
         return this.getAttribute('target-class-name');
     }

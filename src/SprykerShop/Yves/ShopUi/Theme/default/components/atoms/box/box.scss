@@ -1,14 +1,21 @@
+@use 'sass:map';
+@use 'sass:meta';
+
 @mixin shop-ui-box($name: '.box') {
     #{$name} {
         @include helper-ui-clearfix;
-        padding: map-get($setting-spacing, 'default');
-        margin: map-get($setting-spacing, 'default');
+        padding: map.get($setting-spacing, 'default');
+        margin: map.get($setting-spacing, 'default');
         background-color: $setting-color-white;
         border: 1px solid $setting-color-lighter;
 
+        @if meta.mixin-exists(shop-ui-box-base-hook) {
+            @include shop-ui-box-base-hook;
+        }
+
         &__separator {
             display: block;
-            margin: map-get($setting-spacing, 'default') -#{map-get($setting-spacing, 'default')};
+            margin: map.get($setting-spacing, 'default') -#{map.get($setting-spacing, 'default')};
             border-bottom: 1px solid $setting-color-lighter;
         }
 
@@ -52,6 +59,10 @@
 }
 
 @mixin shop-ui-box-action($action, $setting-color-action) {
+    @if meta.mixin-exists(shop-ui-box-action-base-hook) {
+        @include shop-ui-box-action-base-hook;
+    }
+
     &--#{$action} {
         background-color: helper-color-light($setting-color-action);
         border-color: $setting-color-action;

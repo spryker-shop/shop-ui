@@ -4,8 +4,6 @@ export default class CollapsibleList extends Component {
     protected triggerButton: HTMLButtonElement;
     protected targetList: HTMLElement;
 
-    protected readyCallback() {}
-
     protected init() {
         this.triggerButton = <HTMLButtonElement>this.getElementsByClassName(`${this.jsName}__button`)[0];
         this.targetList = <HTMLElement>this.getElementsByClassName(`${this.jsName}__list`)[0];

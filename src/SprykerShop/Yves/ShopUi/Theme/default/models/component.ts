@@ -37,14 +37,6 @@ export default abstract class Component extends HTMLElement {
     }
 
     /**
-     * Same as mountCallback().
-     *
-     * @deprecated Use init() instead.
-     */
-
-    protected abstract readyCallback(): void;
-
-    /**
      * Initialise the component.
      * It's invoked when DOM is completely loaded and every other webcomponent in the page has been defined.
      * @remarks
@@ -54,9 +46,7 @@ export default abstract class Component extends HTMLElement {
      * {@link https://developer.mozilla.org/en-US/docs/Web/Web_Components/
      * Using_custom_elements#Using_the_lifecycle_callbacks}
      */
-    protected init(): void {
-        this.readyCallback();
-    }
+    protected init(): void {}
 
     /**
      * Used by the application to mark the current component as mounted and avoid multiple initialisations.

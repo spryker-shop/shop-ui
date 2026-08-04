@@ -1,5 +1,12 @@
+@use 'sass:map';
+@use 'sass:meta';
+
 @mixin shop-ui-status($name: '.status') {
     @include shop-ui-badge($name) {
+        @if meta.mixin-exists(shop-ui-status-base-hook) {
+            @include shop-ui-status-base-hook;
+        }
+
         &--availability {
             padding: 0 0.75rem 0 1.875rem;
             position: relative;
@@ -22,36 +29,36 @@
         }
 
         &--out-of-stock {
-            background-color: helper-color-light(map-get($setting-color-actions, 'alert'));
+            background-color: helper-color-light(map.get($setting-color-actions, 'alert'));
 
             &::before {
-                background-color: map-get($setting-color-actions, 'alert');
+                background-color: map.get($setting-color-actions, 'alert');
             }
         }
 
         &--in-stock,
         &--never-out-of-stock,
         &--available {
-            background-color: helper-color-light(map-get($setting-color-actions, 'success'));
+            background-color: helper-color-light(map.get($setting-color-actions, 'success'));
 
             &::before {
-                background-color: map-get($setting-color-actions, 'success');
+                background-color: map.get($setting-color-actions, 'success');
             }
         }
 
         &--running-low {
-            background-color: helper-color-light(map-get($setting-color-actions, 'warning'));
+            background-color: helper-color-light(map.get($setting-color-actions, 'warning'));
 
             &::before {
-                background-color: map-get($setting-color-actions, 'warning');
+                background-color: map.get($setting-color-actions, 'warning');
             }
         }
 
         &--rejected,
         &--in-progress,
         &--refunded {
-            background-color: helper-color-light(map-get($setting-color-actions, 'alert'));
-            color: helper-color-dark(map-get($setting-color-actions, 'alert'));
+            background-color: helper-color-light(map.get($setting-color-actions, 'alert'));
+            color: helper-color-dark(map.get($setting-color-actions, 'alert'));
         }
 
         &--approved,
@@ -59,8 +66,8 @@
         &--paid,
         &--delivered,
         &--configured {
-            background-color: helper-color-light(map-get($setting-color-actions, 'success'));
-            color: helper-color-dark(map-get($setting-color-actions, 'success'));
+            background-color: helper-color-light(map.get($setting-color-actions, 'success'));
+            color: helper-color-dark(map.get($setting-color-actions, 'success'));
         }
 
         &--pending,
@@ -71,8 +78,8 @@
         &--shipped-by-merchant,
         &--exported,
         &--not-configured {
-            background-color: helper-color-light(map-get($setting-color-actions, 'warning'));
-            color: helper-color-dark(map-get($setting-color-actions, 'warning'));
+            background-color: helper-color-light(map.get($setting-color-actions, 'warning'));
+            color: helper-color-dark(map.get($setting-color-actions, 'warning'));
         }
 
         &--closed {

@@ -1,8 +1,15 @@
+@use 'sass:map';
+@use 'sass:meta';
+
 @mixin shop-ui-input-dropzone($name: '.input-dropzone') {
     #{$name} {
         display: flex;
         flex-direction: column;
         gap: 0.625rem;
+
+        @if meta.mixin-exists(shop-ui-input-dropzone-base-hook) {
+            @include shop-ui-input-dropzone-base-hook;
+        }
 
         &__area {
             @include helper-effect-transition(border-color);
@@ -19,7 +26,7 @@
             padding-bottom: 0.625rem;
 
             &--error {
-                border-color: map-get($setting-color-actions, 'alert');
+                border-color: map.get($setting-color-actions, 'alert');
             }
 
             &:hover {
@@ -71,7 +78,7 @@
         }
 
         &__file-delete {
-            color: map-get($setting-color-actions, 'alert');
+            color: map.get($setting-color-actions, 'alert');
         }
 
         @content;

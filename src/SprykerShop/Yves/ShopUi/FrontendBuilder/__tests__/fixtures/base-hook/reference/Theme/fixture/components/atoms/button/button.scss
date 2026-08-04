@@ -1,0 +1,9 @@
+@mixin shop-ui-button {
+    .button {
+        padding: 10px;
+
+        &--compact {
+            padding: 0;
+        }
+    }
+}

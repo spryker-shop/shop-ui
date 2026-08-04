@@ -1,4 +1,4 @@
-@import 'utils/spacing';
-@import 'utils/text';
-@import 'utils/float';
-@import 'utils/visibility';
+@forward 'utils/spacing';
+@forward 'utils/text';
+@forward 'utils/float';
+@forward 'utils/visibility';

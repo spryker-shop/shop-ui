@@ -1,0 +1,7 @@
+@use 'AtomExtra/thing' as extra;
+
+@mixin my-alias {
+    .alias {
+        width: extra.$extra-value;
+    }
+}

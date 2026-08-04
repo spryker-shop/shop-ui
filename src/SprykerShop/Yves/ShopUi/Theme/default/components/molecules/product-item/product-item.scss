@@ -1,8 +1,14 @@
+@use 'sass:meta';
+
 @mixin shop-ui-product-item($name: '.product-item') {
     #{$name} {
         position: relative;
         display: flex;
         flex-direction: column;
+
+        @if meta.mixin-exists(shop-ui-product-item-base-hook) {
+            @include shop-ui-product-item-base-hook;
+        }
 
         &__name {
             @include helper-font-weight(bold);

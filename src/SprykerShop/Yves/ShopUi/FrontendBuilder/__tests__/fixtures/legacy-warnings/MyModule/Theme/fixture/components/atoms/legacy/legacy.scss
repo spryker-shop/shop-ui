@@ -1,0 +1,11 @@
+$legacy-sizes: (
+    small: 10px,
+);
+
+@mixin my-legacy {
+    .legacy {
+        width: map-get($legacy-sizes, small);
+        margin: legacy-spacing(base);
+        color: $setting-color-main;
+    }
+}

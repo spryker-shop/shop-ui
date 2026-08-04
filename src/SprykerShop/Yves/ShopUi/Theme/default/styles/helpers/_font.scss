@@ -1,9 +1,12 @@
+@use 'sass:map';
+@use '../settings/font' as *;
+
 /**
  * Sets font-size property from font size settings map - $setting-font-size according to the passed map key.
  * @param {String | Number} $size
  */
 @mixin helper-font-size($size) {
-    font-size: map-get($setting-font-size, $size);
+    font-size: map.get($setting-font-size, $size);
 
     @content;
 }
@@ -13,7 +16,7 @@
  * @param {String} $weight
  */
 @mixin helper-font-weight($weight) {
-    font-weight: map-get($setting-font-weight, $weight);
+    font-weight: map.get($setting-font-weight, $weight);
 
     @content;
 }
@@ -23,7 +26,7 @@
  * @param {String | Number} $height
  */
 @mixin helper-font-line-height($height) {
-    line-height: map-get($setting-font-line-height, $height);
+    line-height: map.get($setting-font-line-height, $height);
 
     @content;
 }

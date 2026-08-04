@@ -1,0 +1,5 @@
+@mixin product-card {
+    @include product-item {
+        flex-direction: row;
+    }
+}

@@ -6,7 +6,7 @@ export default class ActionSingleClickEnforcer extends Component {
      */
     targets: HTMLElement[];
 
-    protected readyCallback(): void {
+    protected init(): void {
         this.targets = <HTMLElement[]>Array.from(document.querySelectorAll(this.targetSelector));
         this.mapEvents();
     }

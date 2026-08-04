@@ -57,13 +57,4 @@ export default class Candidate {
 
         return elements;
     }
-
-    /**
-     * Same as define().
-     *
-     * @deprecated Use define() instead.
-     */
-    async mount(): Promise<Element[]> {
-        return this.define();
-    }
 }

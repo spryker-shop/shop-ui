@@ -1,7 +1,13 @@
+@use 'sass:meta';
+
 @mixin shop-ui-pagination($name: '.pagination') {
     #{$name} {
         @include helper-font-size(small);
         text-align: center;
+
+        @if meta.mixin-exists(shop-ui-pagination-base-hook) {
+            @include shop-ui-pagination-base-hook;
+        }
 
         &__item {
             display: inline-block;

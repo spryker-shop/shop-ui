@@ -1,3 +1,9 @@
+@use '../settings/grid' as *;
+@use '../settings/breakpoint' as *;
+@use '../helpers/breakpoint' as *;
+@use '../helpers/grid' as *;
+@use '../helpers/ui' as *;
+
 /**
  * Provides global class names for the custom responsive grid system with flexible columns
  * and configurable columns count, container with maximum content width

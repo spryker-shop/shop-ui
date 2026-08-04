@@ -40,8 +40,6 @@ interface SubmitProps {
 export default class AjaxFormSubmitter extends Component {
     protected provider: AjaxProvider;
 
-    protected readyCallback(): void {}
-
     protected init(): void {
         this.provider = <AjaxProvider>document.querySelector(`.${this.providerClassName}`);
 

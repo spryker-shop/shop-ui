@@ -1,0 +1,7 @@
+$helper-sizes: (
+    base: 4px,
+);
+
+@function legacy-spacing($key) {
+    @return map-get($helper-sizes, $key);
+}

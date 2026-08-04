@@ -1,5 +1,11 @@
+@use 'sass:meta';
+
 @mixin shop-ui-label($name: '.label') {
     #{$name} {
+        @if meta.mixin-exists(shop-ui-label-base-hook) {
+            @include shop-ui-label-base-hook;
+        }
+
         &--required {
             &::after {
                 content: '*';

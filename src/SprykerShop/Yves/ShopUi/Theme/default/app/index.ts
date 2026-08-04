@@ -63,8 +63,6 @@ async function mountComponents(): Promise<void> {
  * componets.
  *
  * @event components-mount (config().events.mount) Fired when all components has been succesfully mounted.
- * @event components-ready (config().events.ready) Deprecated, use `components-mount` event instead - Fired when all
- * components has been succesfully mounted.
  * @event application-bootstrap (config().events.bootstrap) Fired only once, when all components has been succesfully
  * mounted for the first time and application bootstrap is completed.
  * @event application-error (config().events.error) Fired when an error occours during the mounting process.
@@ -74,12 +72,6 @@ export async function mount(): Promise<void> {
     try {
         await mountComponents();
         dispatchCustomEvent(config().events.mount);
-        /**
-         * @deprecated Use events.mount instead.
-         */
-
-        dispatchCustomEvent(config().events.ready);
-
         if (isBootstrap) {
             dispatchCustomEvent(config().events.bootstrap);
             isBootstrap = false;

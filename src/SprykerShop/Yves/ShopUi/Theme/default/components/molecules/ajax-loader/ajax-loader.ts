@@ -5,15 +5,13 @@ export default class AjaxLoader extends Component {
     protected parent: HTMLElement;
     protected providers: AjaxProvider[];
 
-    protected readyCallback(): void {}
-
     protected init(): void {
         this.parent = <HTMLElement>(this.parentClassName ? this.closest(`.${this.parentClassName}`) : document);
         this.providers = <AjaxProvider[]>(
             Array.from(
                 this.providerClassName
                     ? this.parent.getElementsByClassName(this.providerClassName)
-                    : this.parent.querySelectorAll(this.providerSelector),
+                    : this.parent.querySelectorAll('ajax-provider'),
             )
         );
 
@@ -33,15 +31,6 @@ export default class AjaxLoader extends Component {
 
     protected onFetched(): void {
         this.classList.add('is-invisible');
-    }
-
-    /**
-     * Gets a querySelector name of the provider element.
-     *
-     * @deprecated Use providerClassName() instead.
-     */
-    get providerSelector(): string {
-        return this.getAttribute('provider-selector');
     }
 
     protected get providerClassName(): string {

@@ -1,6 +1,12 @@
+@use 'sass:meta';
+
 @mixin shop-ui-action-bar($name: '.action-bar') {
     #{$name} {
         margin: 1rem 0;
+
+        @if meta.mixin-exists(shop-ui-action-bar-base-hook) {
+            @include shop-ui-action-bar-base-hook;
+        }
 
         @include helper-breakpoint(md) {
             display: flex;

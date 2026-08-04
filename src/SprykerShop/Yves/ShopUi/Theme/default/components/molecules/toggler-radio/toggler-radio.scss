@@ -1,5 +1,11 @@
+@use 'sass:meta';
+
 @mixin shop-ui-toggler-radio($name: '.toggler-radio') {
     @include shop-ui-radio($name) {
+        @if meta.mixin-exists(shop-ui-toggler-radio-base-hook) {
+            @include shop-ui-toggler-radio-base-hook;
+        }
+
         @content;
     }
 }

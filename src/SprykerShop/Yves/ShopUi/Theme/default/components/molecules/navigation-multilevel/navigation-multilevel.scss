@@ -1,5 +1,11 @@
+@use 'sass:meta';
+
 @mixin shop-ui-navigation-multilevel($name: '.navigation-multilevel') {
     #{$name} {
+        @if meta.mixin-exists(shop-ui-navigation-multilevel-base-hook) {
+            @include shop-ui-navigation-multilevel-base-hook;
+        }
+
         &__item--has-children-dropdown:hover {
             z-index: $setting-zi-element + 2;
         }

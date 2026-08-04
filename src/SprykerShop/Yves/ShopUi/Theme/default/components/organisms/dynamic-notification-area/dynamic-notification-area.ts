@@ -9,8 +9,6 @@ export const EVENT_UPDATE_DYNAMIC_MESSAGES = 'updateDynamicMessages';
 export default class DynamicNotificationArea extends Component {
     protected target: HTMLElement;
 
-    protected readyCallback(): void {}
-
     protected init(): void {
         this.target = <HTMLElement>document.getElementsByClassName(this.targetClassName)[0];
         this.mapEvents();

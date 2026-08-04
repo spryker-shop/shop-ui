@@ -1,3 +1,6 @@
+@use 'sass:map';
+@use 'sass:meta';
+
 @mixin shop-ui-main-popup($name: '.main-popup') {
     #{$name} {
         @include helper-visibility-invisible;
@@ -16,6 +19,10 @@
         z-index: $setting-zi-popup;
         overflow: hidden;
 
+        @if meta.mixin-exists(shop-ui-main-popup-base-hook) {
+            @include shop-ui-main-popup-base-hook;
+        }
+
         &--wide {
             width: 77.8125rem;
         }
@@ -31,7 +38,7 @@
         &__title {
             @include helper-font-size(big);
             @include helper-font-weight(bold);
-            padding: map-get($setting-spacing, big) 1.5rem;
+            padding: map.get($setting-spacing, big) 1.5rem;
         }
 
         &__close {
@@ -56,7 +63,7 @@
         }
 
         &__content {
-            padding: 0 map-get($setting-spacing, big) 1.5rem;
+            padding: 0 map.get($setting-spacing, big) 1.5rem;
             overflow-y: auto;
 
             &--scroll-inside-content {

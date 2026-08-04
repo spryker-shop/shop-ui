@@ -1,6 +1,12 @@
+@use 'sass:meta';
+
 @mixin shop-ui-product-item-list($name: '.product-item-list') {
     @include shop-ui-product-item($name) {
         flex-direction: row;
+
+        @if meta.mixin-exists(shop-ui-product-item-list-base-hook) {
+            @include shop-ui-product-item-list-base-hook;
+        }
 
         &__actions {
             flex-grow: 0;

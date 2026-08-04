@@ -11,7 +11,7 @@ export default class FlashMessage extends Component {
      */
     durationTimeoutId: number;
 
-    protected readyCallback(): void {
+    protected init(): void {
         this.mapEvents();
         window.setTimeout(() => this.showFor(this.defaultDuration));
     }

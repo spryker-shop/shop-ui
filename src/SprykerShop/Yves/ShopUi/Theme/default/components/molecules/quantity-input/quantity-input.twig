@@ -6,7 +6,6 @@
     tag: 'label'
 } %}
 
-{# @deprecated property "step" is deprecated. #}
 {% define data = {
     label: 'cart.item_quantity' | trans,
     maxQuantity: null,
@@ -14,7 +13,6 @@
     value: 1,
     readOnly: false,
     hasUpdateButton: true,
-    step: 1,
     inputAttributes: {
         class: 'input input--expand',
         name: 'quantity',
@@ -28,10 +26,7 @@
     buttonAttributes: '',
 } %}
 
-{# @deprecated "define inputAttributes" is deprecated. Use data.inputAttributes instead. #}
-{% define inputAttributes = {} %}
-
-{% set inputAttributes = inputAttributes | merge(data.inputAttributes) %}
+{% set inputAttributes = data.inputAttributes %}
 {% set inputAttributeFilters = {
     type: false,
     value: false,

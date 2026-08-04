@@ -1,5 +1,11 @@
+@use 'sass:meta';
+
 @mixin shop-ui-navigation-icon-list($name: '.navigation-icon-list') {
     #{$name} {
+        @if meta.mixin-exists(shop-ui-navigation-icon-list-base-hook) {
+            @include shop-ui-navigation-icon-list-base-hook;
+        }
+
         &__icon {
             color: $setting-color-text;
         }

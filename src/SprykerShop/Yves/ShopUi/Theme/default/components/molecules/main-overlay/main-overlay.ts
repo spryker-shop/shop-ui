@@ -12,8 +12,6 @@ export default class MainOverlay extends Component {
     protected triggerQueue: OverlayEventDetail[] = [];
     protected showClassName = `${this.name}--show`;
 
-    protected readyCallback(): void {}
-
     protected init(): void {
         this.mapEvents();
 

@@ -1,6 +1,12 @@
+@use 'sass:meta';
+
 @mixin shop-ui-advanced-table($name: '.advanced-table') {
     #{$name} {
         overflow-y: auto;
+
+        @if meta.mixin-exists(shop-ui-advanced-table-base-hook) {
+            @include shop-ui-advanced-table-base-hook;
+        }
 
         &__container {
             width: 100%;

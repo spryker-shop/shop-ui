@@ -52,8 +52,6 @@ export default class ProductItem extends Component {
     protected productFormAddToCart: HTMLFormElement;
     protected productButtonAddToCart: HTMLButtonElement;
 
-    protected readyCallback(): void {}
-
     protected init(): void {
         this.productImage = <HTMLImageElement>this.getElementsByClassName(`${this.jsName}__image`)[0];
         this.productName = <HTMLElement>this.getElementsByClassName(`${this.jsName}__name`)[0];

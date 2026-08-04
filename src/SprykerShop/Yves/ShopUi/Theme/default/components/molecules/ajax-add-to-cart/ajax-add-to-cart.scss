@@ -1,5 +1,11 @@
+@use 'sass:meta';
+
 @mixin shop-ui-ajax-add-to-cart($name: '.ajax-add-to-cart') {
     #{$name} {
+        @if meta.mixin-exists(shop-ui-ajax-add-to-cart-base-hook) {
+            @include shop-ui-ajax-add-to-cart-base-hook;
+        }
+
         &__button {
             height: 100%;
             white-space: nowrap;

@@ -34,3 +34,5 @@ tooling.yml export-ignore
 .gitignore export-ignore
 architecture-baseline.json export-ignore
 .github/ export-ignore
+src/SprykerShop/Yves/ShopUi/FrontendBuilder/__tests__/ export-ignore
+src/SprykerShop/Yves/ShopUi/FrontendBuilder/jest.config.mjs export-ignore

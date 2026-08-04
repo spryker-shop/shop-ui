@@ -18,7 +18,7 @@ export default class ScriptLoader extends Component {
      */
     script: HTMLScriptElement;
 
-    protected readyCallback(): void {
+    protected init(): void {
         this.script = <HTMLScriptElement>document.querySelector(`script[src="${this.src}"]`);
 
         if (!!this.script) {

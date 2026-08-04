@@ -5,11 +5,9 @@
     tag: 'span',
 } %}
 
-{# @deprecated property "noPriceText" is deprecate: kept for BC reasons, will be removed in next major. #}
 {% define data = {
     amount: required,
     originalAmount: null,
-    noPriceText: '---',
     currencyIsoCode: null,
     parentJsName: '',
 } %}
@@ -38,7 +36,7 @@
     {% block defaultPrice %}
         {% if data.amount is empty -%}
             {% block defaultPriceNoText %}
-                {{ data.noPriceText }}
+                ---
             {% endblock %}
         {%- else -%}
             {% block defaultPriceInner %}

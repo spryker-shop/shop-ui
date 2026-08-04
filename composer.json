@@ -18,11 +18,9 @@
     "require-dev": {
         "spryker-eco/google-analytics": "*",
         "spryker-shop/customer-page": "*",
-        "spryker-shop/newsletter-widget": "*",
         "spryker-shop/product-group-widget": "*",
         "spryker/code-sniffer": "*",
         "spryker/container": "*",
-        "spryker/silex": "*",
         "spryker/testify": "*"
     },
     "suggest": {
@@ -32,8 +30,7 @@
         "spryker-shop/money-widget": "If you want to use widgets from module MoneyWidget",
         "spryker-shop/newsletter-widget": "If you want to use components from module NewsletterWidget.",
         "spryker-shop/product-group-widget": "If you want to use components from module ProductGroupColorWidget or ProductGroupWidget",
-        "spryker/container": "If you want to use Twig Plugins",
-        "spryker/silex": "Use this module when using plugins that need Silex dependencies."
+        "spryker/container": "If you want to use Twig Plugins"
     },
     "autoload": {
         "psr-4": {

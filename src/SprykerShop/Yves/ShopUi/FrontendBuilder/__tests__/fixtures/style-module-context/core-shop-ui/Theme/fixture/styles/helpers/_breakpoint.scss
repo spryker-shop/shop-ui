@@ -1,0 +1,5 @@
+@mixin helper-breakpoint-media-min($edge) {
+    @media (min-width: $edge) {
+        @content;
+    }
+}

@@ -1,3 +1,5 @@
+@use 'sass:meta';
+
 @mixin shop-ui-main-overlay($name: '.main-overlay') {
     #{$name} {
         @include helper-visibility-invisible;
@@ -8,6 +10,10 @@
         right: 0;
         background: $setting-color-overlay;
         z-index: $setting-zi-overlay;
+
+        @if meta.mixin-exists(shop-ui-main-overlay-base-hook) {
+            @include shop-ui-main-overlay-base-hook;
+        }
 
         &--show {
             @include helper-visibility-visible;

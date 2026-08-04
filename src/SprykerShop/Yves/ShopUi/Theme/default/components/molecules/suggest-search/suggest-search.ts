@@ -57,14 +57,10 @@ export default class SuggestSearch extends Component {
 
     parentWrapper: HTMLElement = null;
 
-    protected readyCallback(): void {
+    protected init(): void {
         this.ajaxProvider = <AjaxProvider>this.getElementsByClassName(`${this.jsName}__ajax-provider`)[0];
         this.suggestionsContainer = <HTMLElement>this.getElementsByClassName(`${this.jsName}__container`)[0];
-        this.searchInput = <HTMLInputElement>(
-            (this.searchInputClassName
-                ? document.getElementsByClassName(this.searchInputClassName)[0]
-                : document.querySelector(this.searchInputSelector))
-        );
+        this.searchInput = <HTMLInputElement>document.getElementsByClassName(this.searchInputClassName)[0];
         this.navigationActiveClass = `${this.name}__item--active`;
         if (this.parentElementClassName) {
             this.parentWrapper = this.closest(`.${this.parentElementClassName}`);
@@ -359,14 +355,6 @@ export default class SuggestSearch extends Component {
         return Number(this.getAttribute('letters-trashold'));
     }
 
-    /**
-     * Gets a querySelector of the search input field.
-     *
-     * @deprecated Use searchInputClassName() instead.
-     */
-    get searchInputSelector(): string {
-        return <string>this.getAttribute('input-selector');
-    }
     protected get searchInputClassName(): string {
         return this.getAttribute('input-class-name');
     }

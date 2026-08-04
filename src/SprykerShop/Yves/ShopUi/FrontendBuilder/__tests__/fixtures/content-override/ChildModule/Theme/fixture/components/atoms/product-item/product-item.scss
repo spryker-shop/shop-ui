@@ -1,0 +1,11 @@
+@mixin product-item {
+    .product-item {
+        flex-direction: column;
+
+        .product-item__image {
+            width: 100%;
+        }
+
+        @content;
+    }
+}

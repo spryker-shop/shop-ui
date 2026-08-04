@@ -16,8 +16,6 @@ export default class ViewportIntersectionObserver extends Component {
     protected viewportOptions: ViewportOptions;
     protected targets: HTMLElement[];
 
-    protected readyCallback(): void {}
-
     protected init(): void {
         this.updateTargets();
     }

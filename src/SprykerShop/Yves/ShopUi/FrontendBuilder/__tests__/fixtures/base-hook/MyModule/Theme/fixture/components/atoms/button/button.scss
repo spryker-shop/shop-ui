@@ -1,0 +1,15 @@
+@use 'sass:meta';
+
+@mixin shop-ui-button {
+    .button {
+        padding: 10px;
+
+        @if meta.mixin-exists(shop-ui-button-base-hook) {
+            @include shop-ui-button-base-hook;
+        }
+
+        &--compact {
+            padding: 0;
+        }
+    }
+}

@@ -1,6 +1,12 @@
+@use 'sass:meta';
+
 @mixin shop-ui-money-price($name: '.money-price') {
     #{$name} {
         display: block;
+
+        @if meta.mixin-exists(shop-ui-money-price-base-hook) {
+            @include shop-ui-money-price-base-hook;
+        }
 
         &__amount {
             @include helper-font-size(big);

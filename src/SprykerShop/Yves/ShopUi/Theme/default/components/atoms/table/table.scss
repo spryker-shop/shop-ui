@@ -1,5 +1,11 @@
+@use 'sass:meta';
+
 @mixin shop-ui-table($name: '.table') {
     #{$name} {
+        @if meta.mixin-exists(shop-ui-table-base-hook) {
+            @include shop-ui-table-base-hook;
+        }
+
         thead,
         &__head {
             @include helper-font-weight(bold);

@@ -5,8 +5,6 @@ export default class PasswordField extends Component {
     protected button: HTMLElement;
     protected input: HTMLInputElement;
 
-    protected readyCallback(): void {}
-
     protected init(): void {
         this.button = <HTMLElement>this.getElementsByClassName(this.buttonClassName)[0];
         this.input = <HTMLInputElement>this.getElementsByClassName(`${this.jsName}__input`)[0];

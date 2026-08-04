@@ -1,9 +1,15 @@
+@use 'sass:meta';
+
 @mixin shop-ui-header($name: '.header') {
     #{$name} {
         position: relative;
         background-color: helper-color-light($setting-color-main);
         margin-bottom: 1rem;
         z-index: $setting-zi-header;
+
+        @if meta.mixin-exists(shop-ui-header-base-hook) {
+            @include shop-ui-header-base-hook;
+        }
 
         &__row {
             padding: 0.5rem;

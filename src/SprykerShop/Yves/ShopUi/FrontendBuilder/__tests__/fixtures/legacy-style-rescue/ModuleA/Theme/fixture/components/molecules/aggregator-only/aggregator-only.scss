@@ -1,0 +1,7 @@
+@mixin module-a-aggregator-only {
+    .aggregator-only {
+        margin: 0;
+    }
+}
+
+@include module-a-aggregator-only;

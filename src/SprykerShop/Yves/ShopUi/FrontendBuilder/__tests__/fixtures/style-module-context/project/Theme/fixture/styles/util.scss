@@ -1,0 +1,7 @@
+@import 'utils/spacing';
+
+@include util-spacing;
+
+.util-probe {
+    max-width: $setting-grid-max-width;
+}

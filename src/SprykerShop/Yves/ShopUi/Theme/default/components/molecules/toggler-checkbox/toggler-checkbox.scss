@@ -1,5 +1,11 @@
+@use 'sass:meta';
+
 @mixin shop-ui-toggler-checkbox($name: '.toggler-checkbox') {
     @include shop-ui-checkbox($name) {
+        @if meta.mixin-exists(shop-ui-toggler-checkbox-base-hook) {
+            @include shop-ui-toggler-checkbox-base-hook;
+        }
+
         @content;
     }
 }

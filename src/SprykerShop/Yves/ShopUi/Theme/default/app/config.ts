@@ -11,10 +11,6 @@ export interface Config {
 
     events: {
         mount: string;
-        /**
-         * @deprecated Use events.mount instead.
-         */
-        ready: string;
         bootstrap: string;
         error: string;
         upgrade: string;
@@ -37,11 +33,6 @@ export const defaultConfig: Config = {
 
     events: {
         mount: 'components-mount',
-        /**
-         * @deprecated Use events.mount instead.
-         */
-
-        ready: 'components-ready',
         bootstrap: 'application-bootstrap',
         error: 'application-error',
         upgrade: 'components-upgrade',

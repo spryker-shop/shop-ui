@@ -1,7 +1,14 @@
-$shop-ui-simple-carousel-icon-size: map-get($setting-icon-sizes, 'icon-size-big');
+@use 'sass:map';
+@use 'sass:meta';
+
+$shop-ui-simple-carousel-icon-size: map.get($setting-icon-sizes, 'icon-size-big');
 
 @mixin shop-ui-simple-carousel($name: '.simple-carousel') {
     #{$name} {
+        @if meta.mixin-exists(shop-ui-simple-carousel-base-hook) {
+            @include shop-ui-simple-carousel-base-hook;
+        }
+
         &__container {
             position: relative;
             padding-left: $shop-ui-simple-carousel-icon-size;

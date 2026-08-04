@@ -59,8 +59,6 @@ export default class SimpleCarousel extends Component {
         this.dotCurrentModifier = `${this.name}__dot--current`;
     }
 
-    protected readyCallback(): void {}
-
     protected init(): void {
         this.slidesCount = this.getElementsByClassName(`${this.jsName}__slide`).length;
 

@@ -1,0 +1,7 @@
+@mixin module-a-self-include {
+    .self-include {
+        margin: 0;
+    }
+}
+
+@include module-a-self-include;

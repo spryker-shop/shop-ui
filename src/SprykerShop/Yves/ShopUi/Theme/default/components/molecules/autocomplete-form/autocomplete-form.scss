@@ -1,6 +1,13 @@
+@use 'sass:map';
+@use 'sass:meta';
+
 @mixin shop-ui-autocomplete-form($name: '.autocomplete-form') {
     #{$name} {
         position: relative;
+
+        @if meta.mixin-exists(shop-ui-autocomplete-form-base-hook) {
+            @include shop-ui-autocomplete-form-base-hook;
+        }
 
         &__suggestions {
             position: absolute;
@@ -13,7 +20,7 @@
 
         &__item {
             cursor: pointer;
-            padding: map-get($setting-spacing, 'default');
+            padding: map.get($setting-spacing, 'default');
 
             &:hover {
                 background-color: $setting-color-dark;

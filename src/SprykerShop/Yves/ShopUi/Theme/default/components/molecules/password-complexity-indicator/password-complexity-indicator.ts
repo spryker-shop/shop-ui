@@ -28,8 +28,6 @@ export default class PasswordComplexityIndicator extends Component {
     protected indicatorListElement: HTMLElement;
     protected schema: PasswordValidator;
 
-    protected readyCallback(): void {}
-
     protected init(): void {
         this.inputElement = <HTMLInputElement>document.getElementsByClassName(this.inputClassName)[0];
         this.indicatorListElement = <HTMLElement>this.getElementsByClassName(this.indicatorListClassName)[0];

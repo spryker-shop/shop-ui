@@ -6,8 +6,6 @@ import Component from 'ShopUi/models/component';
 export default class AjaxAddToCart extends Component {
     protected button: HTMLButtonElement;
 
-    protected readyCallback(): void {}
-
     protected init(): void {
         this.button = <HTMLButtonElement>this.getElementsByClassName(`${this.jsName}__button`)[0];
         this.mapEvents();

@@ -1,41 +1,12 @@
 import Component from '../../../models/component';
 
 export default class TogglerClick extends Component {
-    /**
-     * Elements triggering the toggle action.
-     *
-     * @deprecated Use triggersList instead.
-     */
-    triggers: HTMLElement[];
     protected triggersList: HTMLElement[];
-
-    /**
-     * Elements targeted by the toggle action.
-     *
-     * @deprecated Use targetsList instead.
-     */
-    targets: HTMLElement[];
     protected targetsList: HTMLElement[];
 
-    protected readyCallback(): void {}
-
     protected init(): void {
-        this.triggersList = <HTMLElement[]>(
-            Array.from(
-                this.triggerClassName
-                    ? document.getElementsByClassName(this.triggerClassName)
-                    : document.querySelectorAll(this.triggerSelector),
-            )
-        );
-        this.targetsList = <HTMLElement[]>(
-            Array.from(
-                this.targetClassName
-                    ? document.getElementsByClassName(this.targetClassName)
-                    : document.querySelectorAll(this.targetSelector),
-            )
-        );
-
-        [this.triggers, this.targets] = [this.triggersList, this.targetsList];
+        this.triggersList = <HTMLElement[]>Array.from(document.getElementsByClassName(this.triggerClassName));
+        this.targetsList = <HTMLElement[]>Array.from(document.getElementsByClassName(this.targetClassName));
 
         this.mapEvents();
     }
@@ -61,26 +32,10 @@ export default class TogglerClick extends Component {
         });
     }
 
-    /**
-     * Gets a querySelector of the trigger element.
-     *
-     * @deprecated Use triggerClassName() instead.
-     */
-    get triggerSelector(): string {
-        return this.getAttribute('trigger-selector');
-    }
     protected get triggerClassName(): string {
         return this.getAttribute('trigger-class-name');
     }
 
-    /**
-     * Gets a querySelector of the target element.
-     *
-     * @deprecated Use targetClassName() instead.
-     */
-    get targetSelector(): string {
-        return this.getAttribute('target-selector');
-    }
     protected get targetClassName(): string {
         return this.getAttribute('target-class-name');
     }

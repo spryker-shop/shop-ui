@@ -1,3 +1,7 @@
+@use 'sass:list';
+@use 'sass:map';
+@use '../settings/spacing' as *;
+
 /**
  * Provides global class names with spacing properties set from $setting-spacing map.
  * @param {String} $name Main selector name.
@@ -10,18 +14,25 @@
 
 @mixin helper-spacing-outer($name, $sides) {
     #{$name} {
+        // Base ('default') declarations are emitted before the modifier rules so the compiled
+        // cascade is base-first at source. Sass >= 1.92 no longer hoists declarations that follow
+        // nested rules (mixed-decls), and `default` is not the first key of $setting-spacing, so
+        // iterating the map in order would place the base rule after its same-specificity modifiers
+        // and let the base override them. See FrontendBuilder/OVERRIDES.md.
+        @if list.length($sides) == 0 {
+            margin: map.get($setting-spacing, 'default');
+        } @else {
+            @each $side in $sides {
+                margin-#{$side}: map.get($setting-spacing, 'default');
+            }
+        }
+
+        @content;
+
         @each $spacing-name, $spacing-value in $setting-spacing {
-            @if $spacing-name == 'default' {
-                @if length($sides) == 0 {
-                    margin: $spacing-value;
-                } @else {
-                    @each $side in $sides {
-                        margin-#{$side}: $spacing-value;
-                    }
-                }
-            } @else {
+            @if $spacing-name != 'default' {
                 &--#{$spacing-name} {
-                    @if length($sides) == 0 {
+                    @if list.length($sides) == 0 {
                         margin: $spacing-value;
                     } @else {
                         @each $side in $sides {
@@ -31,27 +42,31 @@
                 }
             }
         }
-
-        @content;
     }
 }
 
 @mixin helper-spacing-inner($name, $sides) {
     #{$name}--inner {
+        // Base-first for the same reason as helper-spacing-outer (see the comment there and
+        // FrontendBuilder/OVERRIDES.md). The modifier rules here carry higher specificity
+        // (compound selectors) so they are cascade-safe regardless of order, but the plan requires
+        // the identical base-first structure in both spacing helpers.
+        @if list.length($sides) == 0 {
+            margin: 0;
+            padding: map.get($setting-spacing, 'default');
+        } @else {
+            @each $side in $sides {
+                margin-#{$side}: 0;
+                padding-#{$side}: map.get($setting-spacing, 'default');
+            }
+        }
+
+        @content;
+
         @each $spacing-name, $spacing-value in $setting-spacing {
-            @if $spacing-name == 'default' {
-                @if length($sides) == 0 {
-                    margin: 0;
-                    padding: $spacing-value;
-                } @else {
-                    @each $side in $sides {
-                        margin-#{$side}: 0;
-                        padding-#{$side}: $spacing-value;
-                    }
-                }
-            } @else {
+            @if $spacing-name != 'default' {
                 @at-root #{$name}--inner#{$name}--#{$spacing-name} {
-                    @if length($sides) == 0 {
+                    @if list.length($sides) == 0 {
                         margin: 0;
                         padding: $spacing-value;
                     } @else {
@@ -63,7 +78,5 @@
                 }
             }
         }
-
-        @content;
     }
 }

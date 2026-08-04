@@ -1,3 +1,6 @@
+@use 'sass:map';
+@use 'sass:meta';
+
 $shop-ui-tooltip-message-arrow-size: 0.5rem;
 
 @mixin shop-ui-tooltip-message($name: '.tooltip-message') {
@@ -10,6 +13,10 @@ $shop-ui-tooltip-message-arrow-size: 0.5rem;
         margin-top: -$shop-ui-tooltip-message-arrow-size;
         transform: translateX(-50%);
 
+        @if meta.mixin-exists(shop-ui-tooltip-message-base-hook) {
+            @include shop-ui-tooltip-message-base-hook;
+        }
+
         &__text {
             @include helper-font-size(default);
             @include helper-ui-shadow;
@@ -17,7 +24,7 @@ $shop-ui-tooltip-message-arrow-size: 0.5rem;
             display: block;
             position: absolute;
             bottom: 0;
-            padding: map-get($setting-spacing, small);
+            padding: map.get($setting-spacing, small);
             background-color: $setting-color-white;
             border: 1px solid $setting-color-light;
             text-align: center;
@@ -44,6 +51,10 @@ $shop-ui-tooltip-message-arrow-size: 0.5rem;
 }
 
 @mixin shop-ui-tooltip-message-action($action, $setting-color-action) {
+    @if meta.mixin-exists(shop-ui-tooltip-message-action-base-hook) {
+        @include shop-ui-tooltip-message-action-base-hook;
+    }
+
     &--#{$action} &__text {
         background-color: helper-color-light($setting-color-action);
         border-color: $setting-color-action;

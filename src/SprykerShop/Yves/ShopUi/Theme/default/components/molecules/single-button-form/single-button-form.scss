@@ -1,5 +1,11 @@
+@use 'sass:meta';
+
 @mixin shop-ui-single-button-form($name: '.single-button-form') {
     #{$name} {
+        @if meta.mixin-exists(shop-ui-single-button-form-base-hook) {
+            @include shop-ui-single-button-form-base-hook;
+        }
+
         &__button {
             background-color: $setting-color-transparent;
             color: $setting-color-main;

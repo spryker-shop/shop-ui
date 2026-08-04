@@ -1,0 +1,8 @@
+@use 'sass:math';
+
+@mixin basic-grid() {
+    .container {
+        max-width: $setting-grid-max-width;
+        width: math.div(100%, 2);
+    }
+}

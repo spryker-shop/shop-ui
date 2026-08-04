@@ -1,3 +1,5 @@
+@use 'sass:meta';
+
 @mixin shop-ui-button($name: '.button') {
     #{$name} {
         @include helper-effect-transition(background-color box-shadow);
@@ -9,6 +11,10 @@
         color: $setting-color-white;
         text-align: center;
         cursor: pointer;
+
+        @if meta.mixin-exists(shop-ui-button-base-hook) {
+            @include shop-ui-button-base-hook;
+        }
 
         &:hover,
         &:focus {
@@ -65,6 +71,10 @@
 }
 
 @mixin shop-ui-button-action($action, $setting-color-action) {
+    @if meta.mixin-exists(shop-ui-button-action-base-hook) {
+        @include shop-ui-button-action-base-hook;
+    }
+
     &--#{$action} {
         background-color: $setting-color-action;
 

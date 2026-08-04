@@ -1,5 +1,11 @@
+@use 'sass:meta';
+
 @mixin shop-ui-navigation-multiview-list($name: '.navigation-multiview-list') {
     #{$name} {
+        @if meta.mixin-exists(shop-ui-navigation-multiview-list-base-hook) {
+            @include shop-ui-navigation-multiview-list-base-hook;
+        }
+
         &__icon {
             color: $setting-color-dark;
         }

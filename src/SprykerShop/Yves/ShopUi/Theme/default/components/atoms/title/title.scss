@@ -1,5 +1,11 @@
+@use 'sass:meta';
+
 @mixin shop-ui-title($name: '.title') {
     #{$name} {
+        @if meta.mixin-exists(shop-ui-title-base-hook) {
+            @include shop-ui-title-base-hook;
+        }
+
         @each $i in (1, 2, 3, 4, 5, 6) {
             &--h#{$i} {
                 @include helper-font-size($i);

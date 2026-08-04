@@ -35,11 +35,7 @@
 
         <div class="{{ config.name }}__navigation">
             {% block mobileNavigation %}
-                {% widget 'NavigationWidget' args ['MAIN_NAVIGATION', 'navigation-main-mobile'] %}
-                {% nowidget %}
-                    {# @deprecated Kept for BC reasons, will be removed in next major. #}
-                    {{ widgetGlobal('NavigationWidgetPlugin', 'MAIN_NAVIGATION', 'navigation-main-mobile') }}
-                {% endwidget %}
+                {% widget 'NavigationWidget' args ['MAIN_NAVIGATION', 'navigation-main-mobile'] %}{% endwidget %}
             {% endblock %}
             <hr>
             {% embed organism('navigation-top') with {

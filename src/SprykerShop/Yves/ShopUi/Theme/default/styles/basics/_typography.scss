@@ -1,3 +1,9 @@
+@use '../settings/color' as *;
+@use '../settings/font' as *;
+@use '../helpers/color' as *;
+@use '../helpers/font' as *;
+@use '../helpers/ui' as *;
+
 /**
  * Sets font and basic typography styles for the main HTML elements.
  */

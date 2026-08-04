@@ -6,8 +6,6 @@ export default class InputDropzone extends Component {
     protected fileTemplate: HTMLTemplateElement;
     protected transfer = new DataTransfer();
 
-    protected readyCallback(): void {}
-
     protected init(): void {
         this.transfer = new DataTransfer();
         this.input = this.querySelector(`.${this.jsName}__input`);

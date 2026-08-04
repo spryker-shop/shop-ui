@@ -1,5 +1,11 @@
+@use 'sass:meta';
+
 @mixin shop-ui-menu($name: '.menu') {
     @include shop-ui-list($name) {
+        @if meta.mixin-exists(shop-ui-menu-base-hook) {
+            @include shop-ui-menu-base-hook;
+        }
+
         &__item {
             @include helper-font-weight(regular);
             margin: 0.5rem 0;

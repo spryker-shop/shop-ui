@@ -8,20 +8,10 @@ export default class AjaxRenderer extends Component {
     protected provider: AjaxProvider;
     protected target: HTMLElement;
 
-    protected readyCallback(): void {}
-
     protected init(): void {
         this.parent = <HTMLElement>(this.parentClassName ? this.closest(`.${this.parentClassName}`) : document);
-        this.provider = <AjaxProvider>(
-            (this.providerClassName
-                ? this.parent.getElementsByClassName(this.providerClassName)[0]
-                : this.parent.querySelector(this.providerSelector))
-        );
-        this.target = <HTMLElement>(
-            (this.targetClassName
-                ? this.parent.getElementsByClassName(this.targetClassName)[0]
-                : this.parent.querySelector(this.targetSelector ? this.targetSelector : undefined))
-        );
+        this.provider = <AjaxProvider>this.parent.getElementsByClassName(this.providerClassName)[0];
+        this.target = <HTMLElement>this.parent.getElementsByClassName(this.targetClassName)[0];
 
         this.mapEvents();
     }
@@ -70,26 +60,10 @@ export default class AjaxRenderer extends Component {
         }
     }
 
-    /**
-     * Gets a querySelector name of the provider element.
-     *
-     * @deprecated Use providerClassName() instead.
-     */
-    get providerSelector(): string {
-        return this.getAttribute('provider-selector');
-    }
     protected get providerClassName(): string {
         return this.getAttribute('provider-class-name');
     }
 
-    /**
-     * Gets a querySelector name of the target element.
-     *
-     * @deprecated Use targetClassName() instead.
-     */
-    get targetSelector(): string {
-        return this.getAttribute('target-selector');
-    }
     protected get targetClassName(): string {
         return this.getAttribute('target-class-name');
     }

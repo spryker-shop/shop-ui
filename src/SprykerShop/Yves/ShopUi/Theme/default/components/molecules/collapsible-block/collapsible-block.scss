@@ -1,7 +1,13 @@
 @use 'sass:map';
+@use 'sass:meta';
+
 @mixin shop-ui-collapsible-block($name: '.collapsible-block') {
     #{$name} {
         border: 1px solid $setting-color-lighter;
+
+        @if meta.mixin-exists(shop-ui-collapsible-block-base-hook) {
+            @include shop-ui-collapsible-block-base-hook;
+        }
 
         &[open] {
             #{$name}__header::after {

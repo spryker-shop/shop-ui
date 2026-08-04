@@ -72,12 +72,3 @@ export function unregister(tagName: string): boolean {
 export function get(): ReadonlyArray<Candidate> {
     return Array.from(registry.values());
 }
-
-/**
- * Same as get().
- *
- * @deprecated Use get() instead.
- */
-export function candidates(): ReadonlyArray<Candidate> {
-    return get();
-}

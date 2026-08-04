@@ -1,7 +1,13 @@
+@use 'sass:meta';
+
 @mixin shop-ui-navigation-top($name: '.navigation-top') {
     #{$name} {
         position: relative;
         z-index: $setting-zi-navigation-top;
+
+        @if meta.mixin-exists(shop-ui-navigation-top-base-hook) {
+            @include shop-ui-navigation-top-base-hook;
+        }
 
         @content;
     }

@@ -1,0 +1,4 @@
+// async-order fixture: later component in finder input order, must win mixin ownership (last-wins).
+@mixin duplicate-probe {
+    color: blue;
+}

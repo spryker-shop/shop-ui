@@ -2,8 +2,6 @@ import Component from 'ShopUi/models/component';
 import { debug } from 'ShopUi/app/logger';
 
 export default class StyleLoader extends Component {
-    protected readyCallback(): void {}
-
     protected init(): void {
         this.mapEvents();
     }

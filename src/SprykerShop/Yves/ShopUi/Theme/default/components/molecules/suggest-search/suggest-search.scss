@@ -1,9 +1,16 @@
+@use 'sass:map';
+@use 'sass:meta';
+
 @mixin shop-ui-suggest-search($name: '.suggest-search') {
     #{$name} {
+        @if meta.mixin-exists(shop-ui-suggest-search-base-hook) {
+            @include shop-ui-suggest-search-base-hook;
+        }
+
         &__container {
             position: absolute;
             margin: 0;
-            padding: map-get($setting-spacing, 'big');
+            padding: map.get($setting-spacing, 'big');
             width: 100%;
             max-height: 30rem;
             overflow-x: scroll;

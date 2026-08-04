@@ -1,6 +1,12 @@
+@use 'sass:meta';
+
 @mixin shop-ui-lazy-image($name: '.lazy-image') {
     #{$name} {
         line-height: 1;
+
+        @if meta.mixin-exists(shop-ui-lazy-image-base-hook) {
+            @include shop-ui-lazy-image-base-hook;
+        }
 
         &--thumbnail {
             position: relative;

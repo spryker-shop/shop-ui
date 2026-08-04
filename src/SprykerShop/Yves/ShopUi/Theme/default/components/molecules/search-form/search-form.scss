@@ -1,6 +1,12 @@
+@use 'sass:meta';
+
 @mixin shop-ui-search-form($name: '.search-form') {
     #{$name} {
         position: relative;
+
+        @if meta.mixin-exists(shop-ui-search-form-base-hook) {
+            @include shop-ui-search-form-base-hook;
+        }
 
         &__submit {
             position: relative;

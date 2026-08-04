@@ -1,0 +1,7 @@
+@mixin module-a-widget-only {
+    .widget-only {
+        margin: 0;
+    }
+}
+
+@include module-a-widget-only;

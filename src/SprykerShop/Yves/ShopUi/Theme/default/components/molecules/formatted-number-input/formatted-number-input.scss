@@ -1,6 +1,12 @@
+@use 'sass:meta';
+
 @mixin shop-ui-formatted-number-input($name: '.formatted-number-input') {
     #{$name} {
         @include shop-ui-input(#{$name}__input);
+
+        @if meta.mixin-exists(shop-ui-formatted-number-input-base-hook) {
+            @include shop-ui-formatted-number-input-base-hook;
+        }
 
         @content;
     }

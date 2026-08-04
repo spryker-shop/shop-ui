@@ -1,5 +1,6 @@
 @use 'sass:color';
 @use 'sass:meta';
+@use 'sass:string';
 
 /**
  * @param {Color|String} $value
@@ -7,10 +8,10 @@
  */
 @function helper-color-dark($value, $degree: 10) {
     @if meta.type-of($value) == 'color' {
-        @return darken($value, $degree);
+        @return color.adjust($value, $lightness: -($degree * 1%));
     }
 
-    @return unquote('color-mix(in srgb, #{$value} #{100 - $degree}%, black)');
+    @return string.unquote('color-mix(in srgb, #{$value} #{100 - $degree}%, black)');
 }
 
 /**
@@ -19,8 +20,8 @@
  */
 @function helper-color-light($value, $degree: 35) {
     @if meta.type-of($value) == 'color' {
-        @return lighten($value, $degree);
+        @return color.adjust($value, $lightness: ($degree * 1%));
     }
 
-    @return unquote('color-mix(in srgb, #{$value} #{100 - $degree}%, white)');
+    @return string.unquote('color-mix(in srgb, #{$value} #{100 - $degree}%, white)');
 }

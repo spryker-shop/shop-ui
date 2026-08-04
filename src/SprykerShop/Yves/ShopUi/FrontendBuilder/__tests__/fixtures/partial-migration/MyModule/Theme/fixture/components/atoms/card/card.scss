@@ -1,0 +1,7 @@
+@use 'ShopUi/styles/shared' as *;
+
+@mixin my-card {
+    .card {
+        color: $setting-color-main;
+    }
+}

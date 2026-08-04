@@ -1,3 +1,5 @@
+@use 'sass:meta';
+
 @mixin shop-ui-link($name: '.link') {
     #{$name} {
         display: inline-block;
@@ -6,6 +8,10 @@
         background-color: transparent;
         color: helper-color-dark($setting-color-main);
         cursor: pointer;
+
+        @if meta.mixin-exists(shop-ui-link-base-hook) {
+            @include shop-ui-link-base-hook;
+        }
 
         &:hover {
             text-decoration: underline;
@@ -48,6 +54,10 @@
 }
 
 @mixin shop-ui-link-action($action, $setting-color-action) {
+    @if meta.mixin-exists(shop-ui-link-action-base-hook) {
+        @include shop-ui-link-action-base-hook;
+    }
+
     &--#{$action} {
         color: $setting-color-action;
     }
