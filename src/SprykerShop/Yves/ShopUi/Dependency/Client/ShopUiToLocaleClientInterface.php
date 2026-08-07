@@ -9,8 +9,5 @@ namespace SprykerShop\Yves\ShopUi\Dependency\Client;
 
 interface ShopUiToLocaleClientInterface
 {
-    /**
-     * @return string
-     */
-    public function getCurrentLocale();
+    public function getCurrentLocale(): string;
 }

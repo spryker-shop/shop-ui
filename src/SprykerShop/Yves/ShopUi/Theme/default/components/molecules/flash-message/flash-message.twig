@@ -18,7 +18,7 @@
 {% set iconName = data.icon is empty ? iconActionName : data.icon %}
 
 {% block body %}
-    <div class="{{config.name}}__message container grid grid--middle">
+    <div class="{{config.name}}__message container grid grid--middle" {{ qa('flash-message', 'flash-message-' ~ data.action) }}>
         {% include atom('icon') with {
             modifiers: ['bigger'],
             class: 'col col--sm-1',

@@ -42,6 +42,11 @@ $shop-ui-tooltip-message-arrow-size: 0.5rem;
             z-index: $setting-zi-element;
         }
 
+        &--top {
+            bottom: calc(100% + #{$shop-ui-tooltip-message-arrow-size});
+            left: 50%;
+        }
+
         @each $action, $setting-color-action in $setting-color-actions {
             @include shop-ui-tooltip-message-action($action, $setting-color-action);
         }

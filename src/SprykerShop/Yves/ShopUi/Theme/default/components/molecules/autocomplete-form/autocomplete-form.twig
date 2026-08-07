@@ -51,7 +51,7 @@
         <div class="grid">
             <div class="col {% if data.showCleanButton %}col--sm-11{% else %}col--sm-12{% endif %}">
                 <input type="text"
-                       class="input input--expand {{ config.jsName }}__text-input"
+                       class="input input--expand {{ config.jsName }}__text-input {{ config.name }}__text-input"
                        placeholder="{{ data.placeholder | trans }}"
                        value="{{ data.value }}"
                        autocomplete="off">

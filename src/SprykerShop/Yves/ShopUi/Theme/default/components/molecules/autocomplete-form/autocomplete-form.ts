@@ -179,7 +179,7 @@ export default class AutocompleteForm extends Component {
     }
 
     protected onItemClick(item: HTMLElement): void {
-        this.inputText = item.textContent.trim();
+        this.inputText = item.getAttribute('data-label') ?? item.textContent.trim();
         this.inputValue = item.getAttribute(this.valueAttributeName);
         this.dispatchCustomEvent(Events.SET, {
             text: this.inputText,
