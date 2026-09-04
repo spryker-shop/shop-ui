@@ -54,8 +54,7 @@ export default class AjaxFormSubmitter extends Component {
 
     protected onEvent(event: Event): void {
         const trigger = (event.target as HTMLElement).closest(`[${this.triggerAttribute}]`) as
-            | HTMLButtonElement
-            | HTMLInputElement;
+            HTMLButtonElement | HTMLInputElement;
         const eventFromTrigger = trigger?.getAttribute(this.triggerAttribute);
         const isProperEvent = eventFromTrigger ? eventFromTrigger === event.type : true;
 

@@ -1,4 +1,4 @@
-import { join, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { readFileSync, existsSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 import type { BuildHook } from './libs/webpack/build-hooks.mts';
@@ -17,6 +17,7 @@ export interface GlobalSettings {
         tsConfig: string;
         namespaceConfig: string;
         iconSprite: IconSpriteConfig;
+        coreThemeRoot: string;
         sources: Record<string, string>;
     };
     criticalPatterns: string[];
@@ -30,11 +31,10 @@ export interface AppSettings {
     theme: string;
     paths: {
         tsConfig: string;
-        assets: { globalAssets: string; staticAssets: string; currentAssets: string };
+        assets: { coreGlobalAssets: string; globalAssets: string; staticAssets: string; currentAssets: string };
         public: string;
         publicStatic: string;
         iconSprite: IconSpriteConfig;
-        // The source scan roots (`core`, `sprykerCore`, …) are spread in here, so any extra key is a path.
         [sourceName: string]: unknown;
     };
     urls: { assets: string; staticAssets: string };
@@ -54,6 +54,7 @@ interface DefineConfigOverrides {
     paths?: {
         sources?: Record<string, string>;
         iconSprite?: Partial<IconSpriteConfig>;
+        coreThemeRoot?: string;
     };
     buildHooks?: BuildHook[];
 }
@@ -63,18 +64,9 @@ export interface SourceLayout {
     marker: string;
     sources: Record<string, string>;
     iconSpriteSources: string[];
+    coreThemeRoot: string;
 }
 
-// The key order of `sources` is load-bearing in both layouts: `assetsSourceDirs =
-// Object.values(...)` drives the component CSS emission order and the mixin-index precedence
-// ("later entry wins"). `project` is listed last — a deliberate divergence from master's legacy
-// builder, whose dir order was core, sprykerCore, eco, project, features (features last), giving a
-// feature module priority over a same-named project mixin, a semantics nobody intended. With
-// `project` last, a project mixin overrides a same-named feature mixin, mirroring the legacy "last
-// @import wins" precedence customers actually expect for project-level overrides. This is inert for
-// CSS output today (zero duplicate mixin names across the scanned set, verified) — the CSS output
-// under this order was proven equivalent to the legacy builder's before that comparison tooling was
-// retired.
 const monorepoSourceLayout: SourceLayout = {
     name: 'monorepo (modules in src/)',
     marker: 'src/SprykerShop',
@@ -89,6 +81,7 @@ const monorepoSourceLayout: SourceLayout = {
         './src/Pyz/ShopUi/src/Pyz/Yves/ShopUi/Theme/default/components/atoms/icon-sprite/icon-sprite.twig',
         './src/SprykerShop/ShopUi/src/SprykerShop/Yves/ShopUi/Theme/default/components/atoms/icon-sprite/icon-sprite.twig',
     ],
+    coreThemeRoot: './src/SprykerShop/ShopUi/src/SprykerShop/Yves/ShopUi/Theme',
 };
 
 const projectSourceLayout: SourceLayout = {
@@ -105,22 +98,35 @@ const projectSourceLayout: SourceLayout = {
         './src/Pyz/Yves/ShopUi/Theme/default/components/atoms/icon-sprite/icon-sprite.twig',
         './vendor/spryker-shop/shop-ui/src/SprykerShop/Yves/ShopUi/Theme/default/components/atoms/icon-sprite/icon-sprite.twig',
     ],
+    coreThemeRoot: './vendor/spryker-shop/shop-ui/src/SprykerShop/Yves/ShopUi/Theme',
 };
 
-/**
- * Picks the source layout by probing the project tree for a marker directory.
- *
- * The monorepo keeps every shop, core and feature module in `src/`; a project install receives them
- * from composer under `vendor/`. The markers are mutually exclusive in practice: only the monorepo
- * has `src/SprykerShop`, and only a project install has `vendor/spryker-shop` (the monorepo's vendor
- * tree carries `spryker/` and `spryker-eco/`, never `spryker-shop/`). When both are present the
- * monorepo wins, because a checkout that owns the modules in `src/` is the authoritative copy.
- *
- * Detection probes the project tree rather than the builder's own path on purpose: Node resolves
- * symlinks in `import.meta.url`, so a module symlinked into `vendor/` by a composer path repository
- * would otherwise report the monorepo layout inside a project.
- */
-export const resolveSourceLayout = (context: string = process.cwd()): SourceLayout => {
+export const resolveProjectRoot = (startDirectory: string = process.cwd()): string => {
+    let currentDirectory = resolve(startDirectory);
+
+    for (;;) {
+        if (existsSync(join(currentDirectory, 'package-lock.json'))) {
+            return currentDirectory;
+        }
+
+        const parentDirectory = dirname(currentDirectory);
+
+        if (parentDirectory === currentDirectory) {
+            throw new Error(
+                `Cannot locate the Yves project root above ${resolve(startDirectory)}: no ancestor ` +
+                    `directory contains a "package-lock.json".\n` +
+                    `The builder resolves every module path from the project root, which it finds by ` +
+                    `walking up from the working directory.\n` +
+                    `Run the command from inside the project, and run "npm install" first if the ` +
+                    `lockfile is missing.\n`,
+            );
+        }
+
+        currentDirectory = parentDirectory;
+    }
+};
+
+export const resolveSourceLayout = (context: string = resolveProjectRoot()): SourceLayout => {
     if (existsSync(join(context, monorepoSourceLayout.marker))) {
         return monorepoSourceLayout;
     }
@@ -144,7 +150,7 @@ export const resolveSourceLayout = (context: string = process.cwd()): SourceLayo
 const detectedSourceLayout = resolveSourceLayout();
 
 export const defaultGlobalSettings: GlobalSettings = {
-    context: process.cwd(),
+    context: resolveProjectRoot(),
 
     modes: {
         dev: 'development',
@@ -159,35 +165,17 @@ export const defaultGlobalSettings: GlobalSettings = {
             sources: detectedSourceLayout.iconSpriteSources,
             target: './frontend/assets/global/default/icons/sprite.svg',
         },
+        coreThemeRoot: detectedSourceLayout.coreThemeRoot,
         sources: detectedSourceLayout.sources,
     },
 
-    // Patterns for components that must be bundled in the critical chunk (above the fold)
     criticalPatterns: ['**/ShopUi/**', '**/CatalogPage/**', '**/HomePage/**', '**/ProductDetailPage/**'],
 
-    // Project-supplied build hooks run before webpack assembly. Each hook is { name, run(appSettings) }
-    // and may return entry contributions ({ critical?, app?, nonCritical? }) that are merged into the
-    // corresponding webpack entries. The builder ships none; projects register their own via
-    // defineConfig({ buildHooks: [myHook] }) — see libs/webpack/build-hooks.mts for the contract.
     buildHooks: [],
 
     expectedModeArgument: 2,
 };
 
-/**
- * Builds project-level builder settings by merging the supported overrides into the defaults.
- *
- * A project on the standard layout needs no override at all: `resolveSourceLayout` already points
- * the source directories at `vendor/`. Override only when the layout deviates from that.
- *
- * Projects may override:
- *   - `paths.sources`     — where the builder looks for component assets to build
- *   - `paths.iconSprite`  — icon sprite source/target locations
- *   - `buildHooks`        — project build steps run before webpack assembly (e.g. design tokens)
- *
- * All other fields are fixed and inherited from `defaultGlobalSettings`.
- *
- */
 export const defineConfig = (overrides: DefineConfigOverrides = {}): GlobalSettings => {
     const sourcesOverride = overrides?.paths?.sources ?? {};
     const iconSpriteOverride = overrides?.paths?.iconSprite ?? {};
@@ -206,18 +194,13 @@ export const defineConfig = (overrides: DefineConfigOverrides = {}): GlobalSetti
                 ...defaultGlobalSettings.paths.iconSprite,
                 ...iconSpriteOverride,
             },
+            coreThemeRoot: overrides?.paths?.coreThemeRoot ?? defaultGlobalSettings.paths.coreThemeRoot,
         },
     };
 };
 
-/**
- * Resolves the project-level builder settings. Loads `./frontend/yves.settings.mts` when present
- * — its default export replaces the defaults — otherwise returns the packaged defaults. Every
- * entry point that needs global settings (build.mts, the stylelint runner) calls this, so the
- * discovery rule lives in exactly one place.
- */
 export const loadProjectGlobalSettings = async (): Promise<GlobalSettings> => {
-    const projectOverridePath = join(process.cwd(), 'frontend', 'yves.settings.mts');
+    const projectOverridePath = join(resolveProjectRoot(), 'frontend', 'yves.settings.mts');
 
     if (!existsSync(projectOverridePath)) {
         return defaultGlobalSettings;
@@ -290,10 +273,6 @@ const getAppSettingsByTheme = (
         '!node_modules',
         '!public',
         '!test',
-        // Builder Jest fixtures live under `__tests__/fixtures/**` and contain component-shaped
-        // `.scss` (e.g. duplicate `probe-mixin` definitions in project-override). They must never
-        // enter the production style/entry scan: they would break the zero-duplicate-mixin-name
-        // invariant and let injection resolve against non-shipped files.
         '!**/__tests__/**',
         ...ignoreModulesCollection(),
     ];
@@ -306,6 +285,7 @@ const getAppSettingsByTheme = (
     const paths = {
         tsConfig: globalSettings.paths.tsConfig,
         assets: {
+            coreGlobalAssets: join(globalSettings.paths.coreThemeRoot, theme, 'assets'),
             globalAssets: `./frontend/assets/global/${theme}`,
             staticAssets: './frontend/static',
             currentAssets: join('./frontend/assets', namespaceConfig.namespace, theme),

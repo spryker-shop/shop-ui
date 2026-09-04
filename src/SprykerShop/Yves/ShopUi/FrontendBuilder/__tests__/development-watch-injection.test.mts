@@ -80,8 +80,7 @@ describe('development-watch reload injection', () => {
         return importConfigurationWatchMode().then(async (configurationWatchMode) => {
             const configuration = await configurationWatchMode(appSettings);
             const reloadDefinePlugin = (configuration.webpack.plugins ?? []).find(isReloadDefinePlugin) as
-                | webpack.DefinePlugin
-                | undefined;
+                webpack.DefinePlugin | undefined;
 
             expect(reloadDefinePlugin?.definitions.__RELOAD_MANIFEST_URL__).toBe(
                 JSON.stringify('/assets/current/default/dev-build-manifest.json'),

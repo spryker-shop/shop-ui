@@ -1,26 +1,24 @@
 import { join } from 'node:path';
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import commandLineParser from 'commander';
+import { program } from 'commander';
 import stylelint from 'stylelint';
 import { loadProjectGlobalSettings } from '../../settings.mts';
 
-// Discover the project-level override the same way build.mts does, so the shipped
-// package is not coupled to a project file.
 const globalSettings = await loadProjectGlobalSettings();
 
-commandLineParser
+program
     .option('-f, --fix', 'execute stylelint in the fix mode.')
     .option('-p, --file-path <path>', 'execute stylelint only for this file.')
     .parse(process.argv);
 
-const isFixMode = !!commandLineParser.fix;
-const defaultFilePaths = [`${globalSettings.paths.sources.project}/**/*.scss`];
-const filePaths = commandLineParser.filePath ? [commandLineParser.filePath] : defaultFilePaths;
+const commandLineOptions = program.opts();
 
-// Config contract: the packaged stylelint.config.mjs is the default; a project-root
-// .stylelintrc.js wins when present (project override / extension point).
-const projectConfigPath = join(process.cwd(), '.stylelintrc.js');
+const isFixMode = !!commandLineOptions.fix;
+const defaultFilePaths = [join(globalSettings.context, globalSettings.paths.sources.project, '**', '*.scss')];
+const filePaths = commandLineOptions.filePath ? [commandLineOptions.filePath] : defaultFilePaths;
+
+const projectConfigPath = join(globalSettings.context, '.stylelintrc.js');
 const packagedConfigPath = fileURLToPath(new URL('./stylelint.config.mjs', import.meta.url));
 
 let configFile;
@@ -47,8 +45,7 @@ stylelint
     })
     .then(function (data) {
         if (data.errored) {
-            const messages = JSON.parse(JSON.stringify(data.output));
-            process.stdout.write(messages);
+            process.stdout.write(data.report);
             process.exit(1);
         }
     })

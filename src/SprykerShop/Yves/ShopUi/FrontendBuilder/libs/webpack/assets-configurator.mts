@@ -1,18 +1,23 @@
 import { existsSync } from 'node:fs';
+import { isAbsolute, resolve } from 'node:path';
 import CopyPlugin from 'copy-webpack-plugin';
 import type { AppSettings } from '../../settings.mts';
 
-interface CopyPattern {
+export interface CopyPattern {
     from: string;
     to: string;
     context: string;
     globOptions?: { dot?: boolean; ignore?: string[] };
     noErrorOnMissing?: boolean;
+    force?: boolean;
 }
 
-const getCopyConfig = (appSettings: AppSettings): CopyPattern[] =>
+const resolveAgainstContext = (appSettings: AppSettings, assetsPath: string): string =>
+    isAbsolute(assetsPath) ? assetsPath : resolve(appSettings.context, assetsPath);
+
+export const getCopyConfig = (appSettings: AppSettings): CopyPattern[] =>
     Object.values(appSettings.paths.assets).reduce<CopyPattern[]>((copyConfig, assetsPath) => {
-        if (existsSync(assetsPath)) {
+        if (existsSync(resolveAgainstContext(appSettings, assetsPath))) {
             copyConfig.push({
                 from: assetsPath,
                 to: '.',
@@ -22,6 +27,7 @@ const getCopyConfig = (appSettings: AppSettings): CopyPattern[] =>
                     ignore: ['**/.gitkeep'],
                 },
                 noErrorOnMissing: true,
+                force: true,
             });
         }
 
@@ -31,7 +37,7 @@ const getCopyConfig = (appSettings: AppSettings): CopyPattern[] =>
 const getCopyStaticConfig = (appSettings: AppSettings): CopyPattern[] => {
     const staticAssetsPath = appSettings.paths.assets.staticAssets;
 
-    if (!existsSync(staticAssetsPath)) {
+    if (!existsSync(resolveAgainstContext(appSettings, staticAssetsPath))) {
         return [];
     }
 
