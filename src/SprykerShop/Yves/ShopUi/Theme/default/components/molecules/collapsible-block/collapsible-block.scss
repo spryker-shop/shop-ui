@@ -18,7 +18,6 @@
         &__header {
             @include helper-font-size('default');
             @include helper-font-weight('bold');
-
             list-style: none;
             display: flex;
             justify-content: space-between;

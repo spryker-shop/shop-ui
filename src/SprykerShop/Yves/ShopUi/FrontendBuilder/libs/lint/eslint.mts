@@ -2,27 +2,21 @@ import { spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { loadProjectGlobalSettings } from '../../settings.mts';
+import {
+    BUILDER_TESTS_PATTERN,
+    buildYvesThemePattern,
+    getOwnedSourceRoots,
+    loadProjectGlobalSettings,
+} from '../../settings.mts';
 
-const LINTED_FILE_PATTERN = '**/Theme/**/*.{js,ts}';
-const YVES_DIRECTORY_NAME = 'Yves';
+const LINTED_FILE_PATTERN = '*.{js,ts}';
 const PROJECT_CONFIGURATION_FILE_NAME = 'eslint.config.yves.mjs';
-const OWNED_SOURCE_PREFIX = './src/';
 
 const globalSettings = await loadProjectGlobalSettings();
 
-// Only the sources the repository itself contains are linted. In a project layout the core, eco and
-// feature roots point into vendor/, which is installed code and not ours to report on.
-// A source root that does not already end in the Yves layer still has to reach it, otherwise the
-// pattern also matches themes belonging to other layers, such as the Configurator applications.
-const buildFilePattern = (sourceRoot: string): string =>
-    sourceRoot.endsWith(`/${YVES_DIRECTORY_NAME}`)
-        ? `${sourceRoot}/${LINTED_FILE_PATTERN}`
-        : `${sourceRoot}/**/${YVES_DIRECTORY_NAME}/${LINTED_FILE_PATTERN}`;
-
-const filePatterns = Object.values(globalSettings.paths.sources)
-    .filter((sourceRoot) => sourceRoot.startsWith(OWNED_SOURCE_PREFIX))
-    .map(buildFilePattern);
+const filePatterns = getOwnedSourceRoots(globalSettings).map((sourceRoot) =>
+    buildYvesThemePattern(sourceRoot, LINTED_FILE_PATTERN),
+);
 
 const projectConfigPath = join(globalSettings.context, PROJECT_CONFIGURATION_FILE_NAME);
 const packagedConfigPath = fileURLToPath(new URL('./eslint.config.mjs', import.meta.url));
@@ -43,7 +37,16 @@ const configPath = existsSync(projectConfigPath) ? projectConfigPath : packagedC
 // pattern eagerly and turns a seconds-long run into minutes on the Yves tree.
 const result = spawnSync(
     'npx',
-    ['eslint', '--no-config-lookup', '--config', configPath, '--no-error-on-unmatched-pattern', ...filePatterns],
+    [
+        'eslint',
+        '--no-config-lookup',
+        '--config',
+        configPath,
+        '--no-error-on-unmatched-pattern',
+        '--ignore-pattern',
+        BUILDER_TESTS_PATTERN,
+        ...filePatterns,
+    ],
     { cwd: globalSettings.context, stdio: 'inherit' },
 );
 

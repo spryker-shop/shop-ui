@@ -34,7 +34,7 @@
     }
 
     .text-break {
-        word-break: break-word;
+        overflow-wrap: break-word;
     }
 
     @each $action, $setting-color-action in $setting-color-actions {

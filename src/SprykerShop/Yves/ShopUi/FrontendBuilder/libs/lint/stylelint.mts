@@ -3,7 +3,14 @@ import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { program } from 'commander';
 import stylelint from 'stylelint';
-import { loadProjectGlobalSettings } from '../../settings.mts';
+import {
+    BUILDER_TESTS_PATTERN,
+    buildYvesThemePattern,
+    getOwnedSourceRoots,
+    loadProjectGlobalSettings,
+} from '../../settings.mts';
+
+const LINTED_FILE_PATTERN = '*.scss';
 
 const globalSettings = await loadProjectGlobalSettings();
 
@@ -15,7 +22,9 @@ program
 const commandLineOptions = program.opts();
 
 const isFixMode = !!commandLineOptions.fix;
-const defaultFilePaths = [join(globalSettings.context, globalSettings.paths.sources.project, '**', '*.scss')];
+const defaultFilePaths = getOwnedSourceRoots(globalSettings).map((sourceRoot) =>
+    join(globalSettings.context, buildYvesThemePattern(sourceRoot, LINTED_FILE_PATTERN)),
+);
 const filePaths = commandLineOptions.filePath ? [commandLineOptions.filePath] : defaultFilePaths;
 
 const projectConfigPath = join(globalSettings.context, '.stylelintrc.js');
@@ -38,8 +47,10 @@ if (existsSync(projectConfigPath)) {
 
 stylelint
     .lint({
+        cwd: globalSettings.context,
         configFile,
         files: filePaths,
+        ignorePattern: [BUILDER_TESTS_PATTERN],
         formatter: 'string',
         fix: isFixMode,
     })

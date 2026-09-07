@@ -101,6 +101,23 @@ const projectSourceLayout: SourceLayout = {
     coreThemeRoot: './vendor/spryker-shop/shop-ui/src/SprykerShop/Yves/ShopUi/Theme',
 };
 
+const OWNED_SOURCE_PREFIX = './src/';
+const YVES_DIRECTORY_NAME = 'Yves';
+
+// Only the sources the repository itself contains are linted. In a project layout the core, eco and
+// feature roots point into vendor/, which is installed code and not ours to report on.
+export const getOwnedSourceRoots = (globalSettings: GlobalSettings): string[] =>
+    Object.values(globalSettings.paths.sources).filter((sourceRoot) => sourceRoot.startsWith(OWNED_SOURCE_PREFIX));
+
+// A source root that does not already end in the Yves layer still has to reach it, otherwise the
+// pattern also matches themes belonging to other layers, such as the Configurator applications.
+export const buildYvesThemePattern = (sourceRoot: string, filePattern: string): string =>
+    sourceRoot.endsWith(`/${YVES_DIRECTORY_NAME}`)
+        ? `${sourceRoot}/**/Theme/**/${filePattern}`
+        : `${sourceRoot}/**/${YVES_DIRECTORY_NAME}/**/Theme/**/${filePattern}`;
+
+export const BUILDER_TESTS_PATTERN = '**/FrontendBuilder/__tests__/**';
+
 export const resolveProjectRoot = (startDirectory: string = process.cwd()): string => {
     let currentDirectory = resolve(startDirectory);
 

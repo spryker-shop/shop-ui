@@ -24,7 +24,7 @@
  * Forces element invisibility with accessibility support.
  */
 @mixin helper-accessible-visibility-invisible {
-    clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
     pointer-events: none;
 
     @content;
@@ -34,7 +34,7 @@
  * Forces element visibility with accessibility support.
  */
 @mixin helper-accessible-visibility-visible {
-    clip: auto;
+    clip-path: none;
     pointer-events: auto;
 
     @content;
