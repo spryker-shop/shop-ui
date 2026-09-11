@@ -34,4 +34,15 @@ interface ShopUiConstants
      * @var string
      */
     public const IS_STORE_ROUTING_ENABLED = 'STORAGE_ROUTER:IS_STORE_ROUTING_ENABLED';
+
+    /**
+     * Specification:
+     * - When enabled, components render `data-qa` test-automation attributes.
+     * - Disable in production to reduce rendered HTML; keep enabled where end-to-end tests run.
+     *
+     * @api
+     *
+     * @var string
+     */
+    public const string IS_QA_ATTRIBUTES_ENABLED = 'SHOP_UI:IS_QA_ATTRIBUTES_ENABLED';
 }

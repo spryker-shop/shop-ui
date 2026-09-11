@@ -18,20 +18,20 @@
 {%- define modifiers = [] -%}
 {%- define attributes = {} -%}
 
+{#-
+ # The two macros below are the public Component API and are called directly by templates
+ # (as `component.renderClass(...)` or, from a child template, `_self.renderClass(...)`).
+ # Their logic lives in PHP — see `componentClass`/`componentAttributes` in ShopUiTwigExtension —
+ # because a macro invocation is the single most expensive part of rendering a component, and
+ # this model renders once per component on the page.
+ -#}
+
 {% macro renderClass(name, modifiers, extra) %}
-    {{-name | trim-}}
-    {%- for modifier in modifiers -%}{%- if modifier | trim is not empty %} {{name}}--{{modifier | trim}}{% endif -%}{% endfor -%}
-    {%- if extra %} {{extra-}}{% endif -%}
+    {{- componentClass(name, modifiers | default([]), extra | default('')) -}}
 {%- endmacro -%}
 
 {% macro renderAttributes(attributes) %}
-    {%- for name, value in attributes -%}
-        {%- if value is same as(true) -%}
-            {{-' ' ~ name-}}
-        {%- elseif value is not same as(false) -%}
-            {{-' ' ~ name-}}='{{-value-}}'
-        {%- endif -%}
-    {%- endfor -%}
+    {{- componentAttributes(attributes | default({})) -}}
 {%- endmacro -%}
 
 {% import _self as component %}
@@ -43,7 +43,7 @@
         {%- if config.name == config.tag and '-' in config.tag -%}custom-element {% endif -%}
 
         {%- block class -%}
-            {{- component.renderClass(config.name, modifiers, class) -}}
+            {{- componentClass(config.name, modifiers, class) -}}
             {% block extraClass %}{% endblock %}
         {%- endblock -%}"
 
@@ -56,7 +56,7 @@
         )}}
 
         {%- block attributes -%}
-            {{- component.renderAttributes(attributes) -}}
+            {{- componentAttributes(attributes) -}}
         {%- endblock -%}>
             {%- block body -%}{%- endblock -%}
     </{{-config.tag-}}>

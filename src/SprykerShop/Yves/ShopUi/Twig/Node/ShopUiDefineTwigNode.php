@@ -8,10 +8,14 @@
 namespace SprykerShop\Yves\ShopUi\Twig\Node;
 
 use SprykerShop\Yves\ShopUi\ShopUiConfig;
+use Twig\Attribute\YieldReady;
 use Twig\Compiler;
 use Twig\Node\Expression\AbstractExpression;
+use Twig\Node\Expression\ArrayExpression;
+use Twig\Node\Expression\ConstantExpression;
 use Twig\Node\Node;
 
+#[YieldReady]
 class ShopUiDefineTwigNode extends Node
 {
     /**
@@ -58,11 +62,39 @@ class ShopUiDefineTwigNode extends Node
 
     protected function addValueReplacer(Compiler $compiler, string $key): Compiler
     {
-        $compiler->raw('$context[' . $key . '] = array_replace_recursive(')
-            ->subcompile($this->getNode('value'))
+        $valueNode = $this->getNode('value');
+
+        if ($this->isEmptyArrayDefault($valueNode)) {
+            return $compiler;
+        }
+
+        $mergeFunction = $this->isFlatArrayDefault($valueNode) ? 'array_replace' : 'array_replace_recursive';
+
+        $compiler->raw('$context[' . $key . '] = ' . $mergeFunction . '(')
+            ->subcompile($valueNode)
             ->raw(', $context[' . $key . ']);');
 
         return $compiler;
+    }
+
+    protected function isEmptyArrayDefault(Node $valueNode): bool
+    {
+        return $valueNode instanceof ArrayExpression && $valueNode->getKeyValuePairs() === [];
+    }
+
+    protected function isFlatArrayDefault(Node $valueNode): bool
+    {
+        if (!$valueNode instanceof ArrayExpression) {
+            return false;
+        }
+
+        foreach ($valueNode->getKeyValuePairs() as $pair) {
+            if (!$pair['value'] instanceof ConstantExpression) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     protected function addRequiredValueCheck(Compiler $compiler, string $key): Compiler

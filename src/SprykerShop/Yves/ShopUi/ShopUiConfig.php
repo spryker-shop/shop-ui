@@ -79,4 +79,17 @@ class ShopUiConfig extends AbstractBundleConfig
     {
         return $this->get(ShopUiConstants::IS_STORE_ROUTING_ENABLED, false);
     }
+
+    /**
+     * Specification:
+     * - Returns true when components should render `data-qa` test-automation attributes.
+     *
+     * @api
+     *
+     * @return bool
+     */
+    public function isQaAttributesEnabled(): bool
+    {
+        return $this->get(ShopUiConstants::IS_QA_ATTRIBUTES_ENABLED, true);
+    }
 }
