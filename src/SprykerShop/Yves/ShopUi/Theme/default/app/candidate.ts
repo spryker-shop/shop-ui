@@ -39,7 +39,8 @@ export default class Candidate {
 
         const elements: Element[] = Array.from(elementCollection);
 
-        if (this.isCustomElementDefined) {
+        if (customElements.get(this.tagName)) {
+            this.isCustomElementDefined = true;
             return elements;
         }
 
@@ -47,13 +48,17 @@ export default class Candidate {
             debug('define', this.tagName, `(${elements.length})`);
             const customElementModule: CustomElementModule = await this.customElementImporter();
             const customElementConstructor: CustomElementConstructor = customElementModule.default;
-            customElements.define(this.tagName, customElementConstructor);
-            await customElements.whenDefined(this.tagName);
-        } catch (err) {
-            throw new Error(`${this.tagName} failed to be defined\n${err.message}`);
-        }
 
-        this.isCustomElementDefined = true;
+            if (!customElements.get(this.tagName)) {
+                customElements.define(this.tagName, customElementConstructor);
+            }
+
+            this.isCustomElementDefined = true;
+        } catch (err) {
+            const message = err instanceof Error ? err.message : String(err);
+
+            throw new Error(`${this.tagName} failed to be defined\n${message}`);
+        }
 
         return elements;
     }
