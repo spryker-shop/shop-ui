@@ -6,9 +6,8 @@
  * `design-tokens.css` in the project styles directory and contributes it to the `critical`
  * entry, so token definitions precede any component styles that consume them.
  *
- * Everything about the step is optional: a project without a tokens source is skipped
- * silently, and `style-dictionary` itself is an optional dependency — without it the step
- * serves a committed `design-tokens.css` when one exists.
+ * The tokens source switches the step on: without it nothing is generated and style-dictionary is
+ * not even loaded; a committed `design-tokens.css` is still served when there is one.
  */
 
 import { join, sep } from 'node:path';
@@ -27,30 +26,14 @@ interface DesignToken {
 
 const getTokenValue = (token: DesignToken): unknown => token.$value ?? token.value;
 
-// `any` at the third-party boundary: style-dictionary is optional and its types are absent
-// when the package is not installed, so the module surface cannot be typed statically.
+// `any` at the third-party boundary: the step registers transforms through style-dictionary's
+// static API, and tests substitute a fake module with the same surface.
 type StyleDictionaryModule = any;
 
-export type StyleDictionaryLoader = () => Promise<StyleDictionaryModule | null>;
+export type StyleDictionaryLoader = () => Promise<StyleDictionaryModule>;
 
-// Availability is probed via import.meta.resolve rather than by catching the import() error,
-// so a present-but-broken installation still fails the build loudly instead of silently
-// falling back to a stale file.
-const loadInstalledStyleDictionary: StyleDictionaryLoader = async () => {
-    // A non-literal specifier keeps TypeScript from resolving the module's types, which do not
-    // exist when the optional package is not installed.
-    const specifier = 'style-dictionary';
-
-    try {
-        import.meta.resolve(specifier);
-    } catch {
-        return null;
-    }
-
-    const { default: StyleDictionary } = await import(specifier);
-
-    return StyleDictionary;
-};
+// Loaded on demand: most builds have no tokens source, and the library is large.
+const loadStyleDictionary: StyleDictionaryLoader = async () => (await import('style-dictionary')).default;
 
 // The step runs once per namespace × theme; transform registration is global to the
 // style-dictionary module and must not repeat for the same module instance.
@@ -103,42 +86,24 @@ const resolveStylesBuildPath = (appSettings: AppSettings): string => {
  * Returns the absolute path of the design-tokens CSS to prepend to the `critical` entry, or
  * `null` when the project does not use design tokens (no tokens source and no committed CSS).
  *
- * The loader parameter exists for tests only — production callers use the default, which
- * resolves the optionally-installed style-dictionary package.
+ * The loader parameter exists for tests only.
  */
 export const buildDesignTokensCss = async (
     appSettings: AppSettings,
-    loadStyleDictionary: StyleDictionaryLoader = loadInstalledStyleDictionary,
+    loadModule: StyleDictionaryLoader = loadStyleDictionary,
 ): Promise<string | null> => {
     const buildPath = resolveStylesBuildPath(appSettings);
     const cssFilePath = join(buildPath, 'design-tokens.css');
     const assetsRoot = join(appSettings.context, appSettings.paths.assets.globalAssets);
     const sourceTokensPath = join(assetsRoot, 'design-tokens/design-tokens.json');
 
+    // No tokens source: a committed CSS is still honored as a pre-built artifact; otherwise the
+    // project does not use design tokens.
     if (!existsSync(sourceTokensPath)) {
-        // No tokens source: a committed CSS is still honored as a pre-built artifact; otherwise
-        // the project simply does not use design tokens and the step is skipped silently.
         return existsSync(cssFilePath) ? cssFilePath : null;
     }
 
-    const StyleDictionary = await loadStyleDictionary();
-
-    if (!StyleDictionary) {
-        if (existsSync(cssFilePath)) {
-            console.info(`style-dictionary is not installed — using the committed ${cssFilePath} as is.`);
-
-            return cssFilePath;
-        }
-
-        console.warn(
-            `Design tokens source ${sourceTokensPath} exists, but style-dictionary is not installed ` +
-                `and no pre-built ${cssFilePath} was found — design tokens are skipped for this build. ` +
-                `Install it (npm install --save-dev style-dictionary) to generate design-tokens.css, ` +
-                `or commit a pre-built design-tokens.css.`,
-        );
-
-        return null;
-    }
+    const StyleDictionary = await loadModule();
 
     registerTransforms(StyleDictionary);
 

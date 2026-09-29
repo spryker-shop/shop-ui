@@ -22,6 +22,8 @@ export interface GlobalSettings {
     };
     criticalPatterns: string[];
     buildHooks: BuildHook[];
+    /** Whether `lint` also runs the TypeScript compiler over the Yves sources. */
+    typecheck: boolean;
     expectedModeArgument: number;
 }
 
@@ -57,6 +59,7 @@ interface DefineConfigOverrides {
         coreThemeRoot?: string;
     };
     buildHooks?: BuildHook[];
+    typecheck?: boolean;
 }
 
 export interface SourceLayout {
@@ -65,6 +68,7 @@ export interface SourceLayout {
     sources: Record<string, string>;
     iconSpriteSources: string[];
     coreThemeRoot: string;
+    typecheck: boolean;
 }
 
 const monorepoSourceLayout: SourceLayout = {
@@ -82,6 +86,7 @@ const monorepoSourceLayout: SourceLayout = {
         './src/SprykerShop/ShopUi/src/SprykerShop/Yves/ShopUi/Theme/default/components/atoms/icon-sprite/icon-sprite.twig',
     ],
     coreThemeRoot: './src/SprykerShop/ShopUi/src/SprykerShop/Yves/ShopUi/Theme',
+    typecheck: true,
 };
 
 const projectSourceLayout: SourceLayout = {
@@ -99,7 +104,12 @@ const projectSourceLayout: SourceLayout = {
         './vendor/spryker-shop/shop-ui/src/SprykerShop/Yves/ShopUi/Theme/default/components/atoms/icon-sprite/icon-sprite.twig',
     ],
     coreThemeRoot: './vendor/spryker-shop/shop-ui/src/SprykerShop/Yves/ShopUi/Theme',
+    // Off by default: a project's own sources were never type-checked, so turning it on in a minor
+    // release would fail the project's lint on code nobody changed.
+    typecheck: false,
 };
+
+export const sourceLayouts: SourceLayout[] = [monorepoSourceLayout, projectSourceLayout];
 
 const OWNED_SOURCE_PREFIX = './src/';
 const YVES_DIRECTORY_NAME = 'Yves';
@@ -109,10 +119,12 @@ const YVES_DIRECTORY_NAME = 'Yves';
 export const getOwnedSourceRoots = (globalSettings: GlobalSettings): string[] =>
     Object.values(globalSettings.paths.sources).filter((sourceRoot) => sourceRoot.startsWith(OWNED_SOURCE_PREFIX));
 
+export const isYvesLayerRoot = (sourceRoot: string): boolean => sourceRoot.endsWith(`/${YVES_DIRECTORY_NAME}`);
+
 // A source root that does not already end in the Yves layer still has to reach it, otherwise the
 // pattern also matches themes belonging to other layers, such as the Configurator applications.
 export const buildYvesThemePattern = (sourceRoot: string, filePattern: string): string =>
-    sourceRoot.endsWith(`/${YVES_DIRECTORY_NAME}`)
+    isYvesLayerRoot(sourceRoot)
         ? `${sourceRoot}/**/Theme/**/${filePattern}`
         : `${sourceRoot}/**/${YVES_DIRECTORY_NAME}/**/Theme/**/${filePattern}`;
 
@@ -166,6 +178,14 @@ export const resolveSourceLayout = (context: string = resolveProjectRoot()): Sou
 
 const detectedSourceLayout = resolveSourceLayout();
 
+export const YVES_CONFIGURATION_FILE_NAME = 'tsconfig.yves.json';
+
+// A project that keeps its own copy at the root owns it; otherwise it is generated next to the builder.
+export const resolveYvesConfigurationPath = (context: string, layout: SourceLayout): string =>
+    existsSync(join(context, YVES_CONFIGURATION_FILE_NAME))
+        ? `./${YVES_CONFIGURATION_FILE_NAME}`
+        : `${dirname(layout.coreThemeRoot)}/FrontendBuilder/${YVES_CONFIGURATION_FILE_NAME}`;
+
 export const defaultGlobalSettings: GlobalSettings = {
     context: resolveProjectRoot(),
 
@@ -176,7 +196,7 @@ export const defaultGlobalSettings: GlobalSettings = {
     },
 
     paths: {
-        tsConfig: './tsconfig.yves.json',
+        tsConfig: resolveYvesConfigurationPath(resolveProjectRoot(), detectedSourceLayout),
         namespaceConfig: './config/Yves/frontend-build-config.json',
         iconSprite: {
             sources: detectedSourceLayout.iconSpriteSources,
@@ -190,6 +210,8 @@ export const defaultGlobalSettings: GlobalSettings = {
 
     buildHooks: [],
 
+    typecheck: detectedSourceLayout.typecheck,
+
     expectedModeArgument: 2,
 };
 
@@ -201,6 +223,7 @@ export const defineConfig = (overrides: DefineConfigOverrides = {}): GlobalSetti
     return {
         ...defaultGlobalSettings,
         buildHooks: buildHooksOverride,
+        typecheck: overrides?.typecheck ?? defaultGlobalSettings.typecheck,
         paths: {
             ...defaultGlobalSettings.paths,
             sources: {
@@ -216,8 +239,10 @@ export const defineConfig = (overrides: DefineConfigOverrides = {}): GlobalSetti
     };
 };
 
+export const PROJECT_SETTINGS_RELATIVE_PATH = 'frontend/yves.settings.mts';
+
 export const loadProjectGlobalSettings = async (): Promise<GlobalSettings> => {
-    const projectOverridePath = join(resolveProjectRoot(), 'frontend', 'yves.settings.mts');
+    const projectOverridePath = join(resolveProjectRoot(), PROJECT_SETTINGS_RELATIVE_PATH);
 
     if (!existsSync(projectOverridePath)) {
         return defaultGlobalSettings;

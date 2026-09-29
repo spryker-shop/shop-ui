@@ -1,4 +1,4 @@
-import { join } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { readFileSync } from 'node:fs';
 import type { AppSettings } from '../../settings.mts';
 
@@ -18,7 +18,9 @@ export const getAliasList = (appSettings: AppSettings): Record<string, string> =
         if (name !== '*' && aliases[name].length) {
             const alias = name.replace(/(\/\*?)$/, '');
             const aliasPath = aliases[name][0].replace(/(\/\*?)$/, '');
-            map[alias] = join(appSettings.context, aliasPath);
+            // The generated configuration lives beside the builder, and its paths are relative to
+            // itself, so they resolve against its directory and not against the project root.
+            map[alias] = resolve(dirname(tsConfigFile), aliasPath);
         }
 
         return map;

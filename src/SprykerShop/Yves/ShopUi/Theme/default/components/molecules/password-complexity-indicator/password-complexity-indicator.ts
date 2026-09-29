@@ -82,7 +82,8 @@ export default class PasswordComplexityIndicator extends Component {
 
     protected onInputKeyUp(): void {
         const inputValue = this.inputElement.value;
-        const failsList = this.schema.validate(inputValue, { list: true });
+        // With `list: true` the validator returns the names of the failed rules, never a boolean.
+        const failsList = this.schema.validate(inputValue, { list: true }) as string[];
         let passwordValidatorMark = this.maxPasswordComplexity;
 
         failsList.forEach((property: string) => {

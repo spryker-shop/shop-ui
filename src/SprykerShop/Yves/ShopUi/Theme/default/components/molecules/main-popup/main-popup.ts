@@ -12,7 +12,7 @@ export default class MainPopup extends Component {
     protected triggers: HTMLElement[];
     protected overlay: HTMLElement;
     protected cloneTarget = document.body;
-    protected clone: HTMLElement;
+    clone: HTMLElement;
     protected currentPopup: HTMLElement;
     protected isRootPopup: boolean;
     protected isPopupOpened = false;
@@ -109,7 +109,7 @@ export default class MainPopup extends Component {
         this.togglePopup(false);
     }
 
-    protected togglePopup(forcePopup?: boolean): void {
+    togglePopup(forcePopup?: boolean): void {
         if (this.isPopupOpened === forcePopup) {
             return;
         }
@@ -190,7 +190,7 @@ export default class MainPopup extends Component {
         }
     }
 
-    protected replaceContent(html: string): void {
+    replaceContent(html: string): void {
         const popupContent = this.clone.getElementsByClassName(`${this.jsName}__content`)[0];
         popupContent.innerHTML = html;
 

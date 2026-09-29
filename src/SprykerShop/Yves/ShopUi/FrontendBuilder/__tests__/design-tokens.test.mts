@@ -47,7 +47,10 @@ const createFixtureCase = (
     return { appSettings, stylesDirectory, cssFilePath, sourceTokensPath };
 };
 
-const styleDictionaryNotInstalled = async () => null;
+// Proves the library is not even loaded when there is nothing to generate.
+const styleDictionaryMustNotLoad = async (): Promise<never> => {
+    throw new Error('style-dictionary was loaded although nothing had to be generated');
+};
 
 afterEach(() => {
     jest.restoreAllMocks();
@@ -62,37 +65,14 @@ describe('built-in design-tokens step', () => {
         const { appSettings } = createFixtureCase('no-tokens', {});
         const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
 
-        await expect(buildDesignTokensCss(appSettings, styleDictionaryNotInstalled)).resolves.toBeNull();
+        await expect(buildDesignTokensCss(appSettings, styleDictionaryMustNotLoad)).resolves.toBeNull();
         expect(warnSpy).not.toHaveBeenCalled();
     });
 
     it('serves a committed design-tokens.css when there is no tokens source', async () => {
         const { appSettings, cssFilePath } = createFixtureCase('committed-css-only', { withCommittedCss: true });
 
-        await expect(buildDesignTokensCss(appSettings, styleDictionaryNotInstalled)).resolves.toBe(cssFilePath);
-    });
-
-    it('serves a committed design-tokens.css when style-dictionary is not installed', async () => {
-        const { appSettings, cssFilePath } = createFixtureCase('committed-css-and-json', {
-            withTokensJson: true,
-            withCommittedCss: true,
-        });
-        jest.spyOn(console, 'info').mockImplementation(() => undefined);
-
-        await expect(buildDesignTokensCss(appSettings, styleDictionaryNotInstalled)).resolves.toBe(cssFilePath);
-    });
-
-    it('warns with the source path and the install action when tokens exist but style-dictionary does not', async () => {
-        const { appSettings, sourceTokensPath } = createFixtureCase('json-without-library', {
-            withTokensJson: true,
-        });
-        const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
-
-        await expect(buildDesignTokensCss(appSettings, styleDictionaryNotInstalled)).resolves.toBeNull();
-
-        const warningMessage = String(warnSpy.mock.calls[0]?.[0]);
-        expect(warningMessage).toContain(sourceTokensPath);
-        expect(warningMessage).toContain('npm install --save-dev style-dictionary');
+        await expect(buildDesignTokensCss(appSettings, styleDictionaryMustNotLoad)).resolves.toBe(cssFilePath);
     });
 
     it('generates the css through style-dictionary and registers the transforms only once', async () => {
