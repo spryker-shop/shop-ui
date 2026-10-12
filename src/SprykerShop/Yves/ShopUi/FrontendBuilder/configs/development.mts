@@ -18,6 +18,7 @@ import {
     findLegacyOrphanStyles,
 } from '../libs/webpack/legacy-style-rescue.mts';
 import { buildWebpackEntries } from '../libs/webpack/entry-points.mts';
+import { createAppStylesheetPlugin } from '../libs/webpack/app-stylesheet-plugin.mts';
 import {
     createErrorTranslatingSassImplementation,
     createSassInjectionImporterFactory,
@@ -171,6 +172,7 @@ export const getConfiguration = async (appSettings: AppSettings): Promise<BuildC
                 basicStylePath: basicScss!,
                 utilStylePath: utilScss!,
                 designTokensStylePath: designTokensCss,
+                componentEntryPaths: componentEntryPoints,
                 criticalComponentEntryPaths: criticalEntryPoints,
                 nonCriticalComponentEntryPaths: nonCriticalEntryPoints,
                 criticalRescuedStylePaths: criticalOrphanStyles,
@@ -325,6 +327,8 @@ export const getConfiguration = async (appSettings: AppSettings): Promise<BuildC
                 new MiniCssExtractPlugin({
                     filename: `./css/${appSettings.name}.[name].css`,
                 }),
+
+                createAppStylesheetPlugin(),
 
                 (compiler) =>
                     compiler.hooks.done.tap('webpack', (compilationParams) => {

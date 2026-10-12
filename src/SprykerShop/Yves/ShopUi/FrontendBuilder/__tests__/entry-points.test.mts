@@ -1,5 +1,5 @@
 import { describe, it, expect } from '@jest/globals';
-import { BUILDER_ENTRY_NAMES, buildWebpackEntries } from '../libs/webpack/entry-points.mts';
+import { APP_STYLESHEET_ENTRY_NAME, BUILDER_ENTRY_NAMES, buildWebpackEntries } from '../libs/webpack/entry-points.mts';
 import type { WebpackEntrySources } from '../libs/webpack/entry-points.mts';
 
 const sources: WebpackEntrySources = {
@@ -8,8 +8,13 @@ const sources: WebpackEntrySources = {
     basicStylePath: '/abs/basic.scss',
     utilStylePath: '/abs/util.scss',
     designTokensStylePath: '/abs/design-tokens.css',
+    componentEntryPaths: [
+        '/abs/CartPage/molecules/b/index.ts',
+        '/abs/ShopUi/molecules/a/index.ts',
+        '/abs/WishlistPage/molecules/c/index.ts',
+    ],
     criticalComponentEntryPaths: ['/abs/ShopUi/molecules/a/index.ts'],
-    nonCriticalComponentEntryPaths: ['/abs/CartPage/molecules/b/index.ts'],
+    nonCriticalComponentEntryPaths: ['/abs/CartPage/molecules/b/index.ts', '/abs/WishlistPage/molecules/c/index.ts'],
     criticalRescuedStylePaths: ['/abs/ShopUi/molecules/legacy/legacy.scss'],
     nonCriticalRescuedStylePaths: ['/abs/CartPage/molecules/legacy/legacy.scss'],
     hookContributions: {
@@ -36,14 +41,25 @@ describe('webpack entry assembly', () => {
             '/abs/hook-non-critical.css',
             '/abs/CartPage/molecules/legacy/legacy.scss',
             '/abs/CartPage/molecules/b/index.ts',
+            '/abs/WishlistPage/molecules/c/index.ts',
             '/abs/util.scss',
         ]);
     });
 
-    it('composes app from app.ts, the critical bundle, the non-critical bundle and the app hook files', () => {
+    it('registers the components in app in discovery order, not grouped into critical and non-critical', () => {
+        expect(buildWebpackEntries(sources).app).toEqual([
+            '/abs/app.ts',
+            '/abs/CartPage/molecules/b/index.ts',
+            '/abs/ShopUi/molecules/a/index.ts',
+            '/abs/WishlistPage/molecules/c/index.ts',
+            '/abs/hook-app.ts',
+        ]);
+    });
+
+    it('builds the app stylesheet from app.ts, the critical bundle, the non-critical bundle and the app hook files', () => {
         const entries = buildWebpackEntries(sources);
 
-        expect(entries.app).toEqual([
+        expect(entries[APP_STYLESHEET_ENTRY_NAME]).toEqual([
             '/abs/app.ts',
             ...(entries.critical as string[]),
             ...(entries['non-critical'] as string[]),
