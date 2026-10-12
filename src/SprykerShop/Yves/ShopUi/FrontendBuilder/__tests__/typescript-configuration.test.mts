@@ -270,6 +270,51 @@ describe('the theme aliases', () => {
     });
 });
 
+describe('a custom project namespace', () => {
+    const CUSTOM_NAMESPACE_ROOT = './src/Acme/Yves';
+
+    const namespacedSettingsFor = (context: string, sources: Record<string, string>): GlobalSettings => {
+        const settings = projectSettingsFor(context);
+
+        return { ...settings, paths: { ...settings.paths, sources: { ...settings.paths.sources, ...sources } } };
+    };
+
+    it('type-checks the themes of Pyz and of a namespace registered next to it', async () => {
+        const { configuration } = await reconcileYvesConfiguration(
+            namespacedSettingsFor(createProjectRoot(), { acme: CUSTOM_NAMESPACE_ROOT }),
+        );
+
+        expect(configuration.include).toEqual(
+            expect.arrayContaining([
+                `${BUILDER_LADDER}/src/Pyz/Yves/**/Theme/**/*.ts`,
+                `${BUILDER_LADDER}/src/Acme/Yves/**/Theme/**/*.ts`,
+            ]),
+        );
+    });
+
+    it('keeps the core alias of a module whose theme a namespace registered next to Pyz also ships', async () => {
+        const context = createProjectWithThemeImports();
+        writeSource(context, 'src/Acme/Yves/ShopUi/Theme/default/components/atoms/badge/badge.ts', 'export {};\n');
+
+        const { configuration } = await reconcileYvesConfiguration(
+            namespacedSettingsFor(context, { acme: CUSTOM_NAMESPACE_ROOT }),
+        );
+
+        expect(configuration.compilerOptions!.paths!['ShopUi/*']).toEqual([
+            `${BUILDER_LADDER}/${CORE_SHOP_UI_THEME}/*`,
+        ]);
+    });
+
+    it('drops every Pyz include once the namespace replaces Pyz under the project key', async () => {
+        const { configuration } = await reconcileYvesConfiguration(
+            namespacedSettingsFor(createProjectRoot(), { project: CUSTOM_NAMESPACE_ROOT }),
+        );
+
+        expect(configuration.include!.some((entry) => entry.includes('/src/Pyz/'))).toBe(false);
+        expect(configuration.include).toContain(`${BUILDER_LADDER}/src/Acme/Yves/**/Theme/**/*.ts`);
+    });
+});
+
 describe('an existing Yves configuration', () => {
     it('gets the generated extends list on every run and keeps every compiler option', async () => {
         const context = createMonorepoRoot();

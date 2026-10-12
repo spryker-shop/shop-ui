@@ -1,0 +1,12 @@
+{
+    "path": "assets/%namespace%/%theme%",
+    "staticPath": "assets/static",
+    "namespaces": [
+        {
+            "codeBucket": "DE",
+            "namespace": "DE",
+            "themes": ["fixture-custom"],
+            "defaultTheme": "fixture"
+        }
+    ]
+}

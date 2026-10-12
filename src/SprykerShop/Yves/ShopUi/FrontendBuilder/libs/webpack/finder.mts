@@ -86,13 +86,19 @@ const find = async (
     return defaultThemeFiles.concat(customThemeFiles);
 };
 
+// A component is identified by its type directory and its own directory (`molecules/side-drawer`):
+// the key the entry-point merge dedups on, and the key the legacy style rescue uses to recognise a
+// component that another directory provides.
+export const componentKeyOf = (filePath: string): string => {
+    const componentDirectory = dirname(filePath);
+
+    return `${basename(dirname(componentDirectory))}/${basename(componentDirectory)}`;
+};
+
 const mergeEntryPoints = async (files: string[]): Promise<string[]> =>
     Object.values(
         files.reduce<Record<string, string>>((map, file) => {
-            const dir = dirname(file);
-            const name = basename(dir);
-            const type = basename(dirname(dir));
-            map[`${type}/${name}`] = file;
+            map[componentKeyOf(file)] = file;
 
             return map;
         }, {}),
@@ -107,7 +113,7 @@ const findEntryPoints = async (settings: FindSettings): Promise<string[]> => {
 export const findComponentEntryPoints = async (settings: FindSettings): Promise<string[]> => findEntryPoints(settings);
 
 export const findComponentStyles = async (settings: FindSettings): Promise<string[]> =>
-    find(settings.dirs, settings.patterns, [], settings.globSettings);
+    find(settings.dirs, settings.patterns, settings.fallbackPatterns ?? [], settings.globSettings);
 
 export const findAppEntryPoint = async (settings: FindSettings, file: string): Promise<string | undefined> => {
     const config: FindSettings = { ...settings };

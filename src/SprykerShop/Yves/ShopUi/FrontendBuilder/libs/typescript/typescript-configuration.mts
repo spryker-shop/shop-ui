@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import glob from 'fast-glob';
 import {
     buildYvesThemePattern,
+    getProjectSourceRoots,
     isYvesLayerRoot,
     YVES_CONFIGURATION_FILE_NAME,
     resolveProjectRoot,
@@ -221,15 +222,15 @@ export const reconcileYvesConfiguration = async (
     const { filePath, directory } = resolveYvesConfigurationLocation(context);
     const parentDirectoryLadder = buildParentDirectoryLadder(directory);
     const sourceRoots = Object.values(globalSettings.paths.sources);
-    const projectSourceRoot = globalSettings.paths.sources.project;
+    const projectSourceRoots = getProjectSourceRoots(globalSettings);
 
-    // In a project the core themes live in vendor/, so every root but the project one is searched;
+    // In a project the core themes live in vendor/, so every root but the project ones is searched;
     // a project theme of the same name must not take over the core module's alias.
     const coreThemeDirectories = await findThemeDirectories(
         context,
-        sourceRoots.filter((sourceRoot) => sourceRoot !== projectSourceRoot),
+        sourceRoots.filter((sourceRoot) => !projectSourceRoots.includes(sourceRoot)),
     );
-    const projectThemeDirectories = await findThemeDirectories(context, [projectSourceRoot]);
+    const projectThemeDirectories = await findThemeDirectories(context, projectSourceRoots);
 
     // Usages are collected from every source root: an eco module in vendor/ imports
     // TraceableEventWidget through its alias, and missing that would drop an alias the build needs.

@@ -1,6 +1,7 @@
 import { dirname, join, resolve } from 'node:path';
 import { readFileSync, existsSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
+import glob from 'fast-glob';
 import type { BuildHook } from './libs/webpack/build-hooks.mts';
 import type { NamespaceConfig } from './libs/sass/namespace-config-parser.mts';
 import type { FindSettings } from './libs/webpack/finder.mts';
@@ -25,6 +26,8 @@ export interface GlobalSettings {
     /** Whether `lint` also runs the TypeScript compiler over the Yves sources. */
     typecheck: boolean;
     expectedModeArgument: number;
+    generatedBuildConfiguration: GeneratedBuildConfiguration | null;
+    buildConfigurationSource: string;
 }
 
 export interface AppSettings {
@@ -111,6 +114,134 @@ const projectSourceLayout: SourceLayout = {
 
 export const sourceLayouts: SourceLayout[] = [monorepoSourceLayout, projectSourceLayout];
 
+// Written by the backend before every build; without it the built-in layout above stays in effect.
+export const BUILD_CONFIGURATION_PATH = 'data/cache/Yves/frontend/build-config.json';
+
+export interface GeneratedBuildConfiguration {
+    /** Strongest first. */
+    coreNamespaces: string[];
+    projectNamespaces: string[];
+    theme?: string;
+    defaultTheme?: string;
+}
+
+export const readGeneratedBuildConfiguration = (context: string): GeneratedBuildConfiguration | null => {
+    const filePath = join(context, BUILD_CONFIGURATION_PATH);
+
+    if (!existsSync(filePath)) {
+        return null;
+    }
+
+    const parsed: Partial<GeneratedBuildConfiguration> = JSON.parse(readFileSync(filePath, 'utf8'));
+
+    if (!Array.isArray(parsed.coreNamespaces) || !Array.isArray(parsed.projectNamespaces)) {
+        throw new Error(
+            `${filePath}: "coreNamespaces" and "projectNamespaces" must be lists of namespace names; ` +
+                `regenerate the file with "vendor/bin/console frontend:yves:build".`,
+        );
+    }
+
+    return parsed as GeneratedBuildConfiguration;
+};
+
+const dasherize = (value: string): string => value.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+
+// `src/<Namespace>` when the repository holds the modules, the Composer package directory otherwise.
+const resolveNamespaceDirectory = (context: string, namespace: string): string =>
+    existsSync(join(context, 'src', namespace)) ? `./src/${namespace}` : `./vendor/${dasherize(namespace)}`;
+
+// `project` is the root that holds the application entry and the key a settings file may replace.
+const PROJECT_NAMESPACE = 'Pyz';
+
+const SHOP_UI_HOME_NAMESPACE = 'SprykerShop';
+const ICON_SPRITE_THEME_RELATIVE_PATH = 'ShopUi/Theme/default/components/atoms/icon-sprite/icon-sprite.twig';
+
+// The finder lets a later root win, the backend lists the strongest first: both lists are reversed.
+// A project root is emitted in both layout shapes (split per module and flat); an empty shape matches nothing.
+const buildGeneratedSources = (context: string, generated: GeneratedBuildConfiguration): Record<string, string> => {
+    const sources: Record<string, string> = {};
+    const keyOf = (namespace: string): string =>
+        namespace === PROJECT_NAMESPACE ? 'project' : namespace.toLowerCase();
+
+    [...generated.coreNamespaces].reverse().forEach((namespace) => {
+        sources[keyOf(namespace)] = resolveNamespaceDirectory(context, namespace);
+    });
+    [...generated.projectNamespaces].reverse().forEach((namespace) => {
+        // Split shape last: its key (`project` for Pyz) stays the strongest root, also when a settings file replaces it.
+        sources[`${keyOf(namespace)}/Yves`] = `${resolveNamespaceDirectory(context, namespace)}/Yves`;
+        sources[keyOf(namespace)] = `${resolveNamespaceDirectory(context, namespace)}/*/src/${namespace}/Yves`;
+    });
+
+    return sources;
+};
+
+// The ShopUi package directory is `ShopUi` in the monorepo and `shop-ui` under vendor/.
+const resolveGeneratedCoreThemeRoot = (context: string): string => {
+    const pattern = `${resolveNamespaceDirectory(context, SHOP_UI_HOME_NAMESPACE).replace(/^\.\//, '')}/*/src/SprykerShop/Yves/ShopUi/Theme`;
+    const matches = glob.sync(pattern, { cwd: context, onlyDirectories: true }).sort();
+
+    if (matches.length !== 1) {
+        throw new Error(
+            `Cannot locate the core ShopUi theme from ${join(context, BUILD_CONFIGURATION_PATH)}: ` +
+                `${matches.length === 0 ? `nothing matches ${pattern}` : `several match: ${matches.join(', ')}`}.\n` +
+                `The builder derives the core theme root from the "${SHOP_UI_HOME_NAMESPACE}" namespace of the file.\n` +
+                `Check that the ShopUi module is installed, or set paths.coreThemeRoot in ./${PROJECT_SETTINGS_RELATIVE_PATH}.\n`,
+        );
+    }
+
+    return `./${matches[0]}`;
+};
+
+// Defaults, then the generated file, then the project settings on top: a `paths` value the settings
+// changed survives, so a root from `frontend/yves.settings.mts` is scanned after the generated ones.
+export const applyGeneratedBuildConfiguration = (
+    settings: GlobalSettings,
+    generated: GeneratedBuildConfiguration | null,
+): GlobalSettings => {
+    if (generated === null) {
+        return settings;
+    }
+
+    const isProjectValue = (value: unknown, defaultValue: unknown): boolean =>
+        JSON.stringify(value) !== JSON.stringify(defaultValue);
+    const projectSources = Object.fromEntries(
+        Object.entries(settings.paths.sources).filter(
+            ([key, root]) => defaultGlobalSettings.paths.sources[key] !== root,
+        ),
+    );
+    const coreThemeRoot = isProjectValue(settings.paths.coreThemeRoot, defaultGlobalSettings.paths.coreThemeRoot)
+        ? settings.paths.coreThemeRoot
+        : resolveGeneratedCoreThemeRoot(settings.context);
+    const iconSpriteSources = generated.projectNamespaces.flatMap((namespace) => [
+        `${resolveNamespaceDirectory(settings.context, namespace)}/ShopUi/src/${namespace}/Yves/${ICON_SPRITE_THEME_RELATIVE_PATH}`,
+        `${resolveNamespaceDirectory(settings.context, namespace)}/Yves/${ICON_SPRITE_THEME_RELATIVE_PATH}`,
+    ]);
+
+    return {
+        ...settings,
+        paths: {
+            ...settings.paths,
+            tsConfig: resolveYvesConfigurationPath(settings.context, { coreThemeRoot }),
+            iconSprite: {
+                ...settings.paths.iconSprite,
+                sources: isProjectValue(
+                    settings.paths.iconSprite.sources,
+                    defaultGlobalSettings.paths.iconSprite.sources,
+                )
+                    ? settings.paths.iconSprite.sources
+                    : [
+                          ...iconSpriteSources,
+                          `${coreThemeRoot}/${ICON_SPRITE_THEME_RELATIVE_PATH.replace(/^ShopUi\/Theme\//, '')}`,
+                      ],
+            },
+            coreThemeRoot,
+            sources: { ...buildGeneratedSources(settings.context, generated), ...projectSources },
+        },
+        generatedBuildConfiguration: generated,
+        buildConfigurationSource: `generated (${join(settings.context, BUILD_CONFIGURATION_PATH)})`,
+    };
+};
+
 const OWNED_SOURCE_PREFIX = './src/';
 const YVES_DIRECTORY_NAME = 'Yves';
 
@@ -118,6 +249,11 @@ const YVES_DIRECTORY_NAME = 'Yves';
 // feature roots point into vendor/, which is installed code and not ours to report on.
 export const getOwnedSourceRoots = (globalSettings: GlobalSettings): string[] =>
     Object.values(globalSettings.paths.sources).filter((sourceRoot) => sourceRoot.startsWith(OWNED_SOURCE_PREFIX));
+
+export const getProjectSourceRoots = (globalSettings: GlobalSettings): string[] =>
+    Object.entries(globalSettings.paths.sources)
+        .filter(([sourceKey]) => sourceKey === 'project' || sourceKey.startsWith('project/'))
+        .map(([, sourceRoot]) => sourceRoot);
 
 export const isYvesLayerRoot = (sourceRoot: string): boolean => sourceRoot.endsWith(`/${YVES_DIRECTORY_NAME}`);
 
@@ -129,6 +265,8 @@ export const buildYvesThemePattern = (sourceRoot: string, filePattern: string): 
         : `${sourceRoot}/**/${YVES_DIRECTORY_NAME}/**/Theme/**/${filePattern}`;
 
 export const BUILDER_TESTS_PATTERN = '**/FrontendBuilder/__tests__/**';
+
+export const PROJECT_SETTINGS_RELATIVE_PATH = 'frontend/yves.settings.mts';
 
 export const resolveProjectRoot = (startDirectory: string = process.cwd()): string => {
     let currentDirectory = resolve(startDirectory);
@@ -181,7 +319,7 @@ const detectedSourceLayout = resolveSourceLayout();
 export const YVES_CONFIGURATION_FILE_NAME = 'tsconfig.yves.json';
 
 // A project that keeps its own copy at the root owns it; otherwise it is generated next to the builder.
-export const resolveYvesConfigurationPath = (context: string, layout: SourceLayout): string =>
+export const resolveYvesConfigurationPath = (context: string, layout: Pick<SourceLayout, 'coreThemeRoot'>): string =>
     existsSync(join(context, YVES_CONFIGURATION_FILE_NAME))
         ? `./${YVES_CONFIGURATION_FILE_NAME}`
         : `${dirname(layout.coreThemeRoot)}/FrontendBuilder/${YVES_CONFIGURATION_FILE_NAME}`;
@@ -213,6 +351,9 @@ export const defaultGlobalSettings: GlobalSettings = {
     typecheck: detectedSourceLayout.typecheck,
 
     expectedModeArgument: 2,
+
+    generatedBuildConfiguration: null,
+    buildConfigurationSource: `built-in defaults (no ${BUILD_CONFIGURATION_PATH}; the backend generates it)`,
 };
 
 export const defineConfig = (overrides: DefineConfigOverrides = {}): GlobalSettings => {
@@ -239,19 +380,19 @@ export const defineConfig = (overrides: DefineConfigOverrides = {}): GlobalSetti
     };
 };
 
-export const PROJECT_SETTINGS_RELATIVE_PATH = 'frontend/yves.settings.mts';
-
 export const loadProjectGlobalSettings = async (): Promise<GlobalSettings> => {
     const projectOverridePath = join(resolveProjectRoot(), PROJECT_SETTINGS_RELATIVE_PATH);
 
+    const generated = readGeneratedBuildConfiguration(defaultGlobalSettings.context);
+
     if (!existsSync(projectOverridePath)) {
-        return defaultGlobalSettings;
+        return applyGeneratedBuildConfiguration(defaultGlobalSettings, generated);
     }
 
     try {
         const { default: projectSettings } = await import(pathToFileURL(projectOverridePath).href);
 
-        return projectSettings as GlobalSettings;
+        return applyGeneratedBuildConfiguration(projectSettings as GlobalSettings, generated);
     } catch (error) {
         const reason = error instanceof Error ? error.message : String(error);
 
@@ -275,13 +416,43 @@ const entryPointParts = [
 const entryPointsCollection = (pathPattern: string): string[] =>
     entryPointParts.map((element) => `${pathPattern}/${element}`);
 
-interface NamespaceJson {
+const componentStyleParts = [
+    'components/atoms/*/*.scss',
+    'components/molecules/*/*.scss',
+    'components/organisms/*/*.scss',
+    'templates/*/*.scss',
+    'views/*/*.scss',
+];
+
+export interface NamespaceJson {
     path: string;
     staticPath: string;
     namespaces: NamespaceConfig[];
 }
 
-const getNamespaceJson = (pathToConfig: string): NamespaceJson => JSON.parse(readFileSync(pathToConfig, 'utf8'));
+// The namespace file stays the source of the URL, the code buckets and the namespaces with their own
+// themes; the backend configuration adds the theme it is configured with and sets the default theme.
+export const resolveNamespaceJson = (pathToConfig: string, globalSettings: GlobalSettings): NamespaceJson => {
+    const namespaceJson: NamespaceJson = JSON.parse(readFileSync(pathToConfig, 'utf8'));
+    const generated = globalSettings.generatedBuildConfiguration;
+
+    if (generated === null) {
+        return namespaceJson;
+    }
+
+    return {
+        ...namespaceJson,
+        namespaces: namespaceJson.namespaces.map((entry) => {
+            const defaultTheme = generated.defaultTheme || entry.defaultTheme;
+            const addsTheme =
+                Boolean(generated.theme) &&
+                generated.theme !== defaultTheme &&
+                !entry.themes.includes(generated.theme!);
+
+            return { ...entry, defaultTheme, themes: addsTheme ? [...entry.themes, generated.theme!] : entry.themes };
+        }),
+    };
+};
 
 const getAppSettingsByTheme = (
     namespaceConfig: NamespaceConfig,
@@ -290,7 +461,7 @@ const getAppSettingsByTheme = (
     globalSettings: GlobalSettings,
 ) => {
     const name = 'yves_default';
-    const namespaceJson = getNamespaceJson(pathToConfig);
+    const namespaceJson = resolveNamespaceJson(pathToConfig, globalSettings);
     const assetsSourcePath = globalSettings.paths.sources;
 
     const getPublicUrl = () =>
@@ -356,6 +527,24 @@ const getAppSettingsByTheme = (
         ];
     };
 
+    // Component style files feed the mixin index and the legacy style rescue. Like the entry points,
+    // they are collected from the default theme first and the current theme after it, so a
+    // current-theme mixin wins over the default-theme one of the same name, project last within
+    // each theme. `style.scss` aggregators only include, they define nothing worth indexing.
+    const componentStylePatterns = (isFallbackPattern = false) => {
+        if (isFallbackPatternAndDefaultTheme(isFallbackPattern)) {
+            return [];
+        }
+
+        const themeName = getThemeName(isFallbackPattern);
+
+        return [
+            ...componentStyleParts.map((element) => `**/Theme/${themeName}/${element}`),
+            `!**/Theme/${themeName}/**/style.scss`,
+            ...ignoreFiles,
+        ];
+    };
+
     const shopUiEntryPointsPattern = (isFallbackPattern = false) => {
         if (isFallbackPatternAndDefaultTheme(isFallbackPattern)) {
             return [];
@@ -393,18 +582,13 @@ const getAppSettingsByTheme = (
             },
             componentStyles: {
                 dirs: assetsSourceDirs,
-                patterns: [
-                    `**/Theme/${namespaceConfig.defaultTheme}/components/atoms/*/*.scss`,
-                    `**/Theme/${namespaceConfig.defaultTheme}/components/molecules/*/*.scss`,
-                    `**/Theme/${namespaceConfig.defaultTheme}/components/organisms/*/*.scss`,
-                    `**/Theme/${namespaceConfig.defaultTheme}/templates/*/*.scss`,
-                    `**/Theme/${namespaceConfig.defaultTheme}/views/*/*.scss`,
-                    `!**/Theme/${namespaceConfig.defaultTheme}/**/style.scss`,
-                    ...ignoreFiles,
-                ],
+                patterns: componentStylePatterns(),
+                fallbackPatterns: componentStylePatterns(true),
             },
             shopUiEntryPoints: {
-                dirs: [join(globalSettings.context, assetsSourcePath.project)],
+                dirs: getProjectSourceRoots(globalSettings).map((sourceRoot) =>
+                    join(globalSettings.context, sourceRoot),
+                ),
                 patterns: [...shopUiEntryPointsPattern()],
                 fallbackPatterns: [...shopUiEntryPointsPattern(true)],
             },

@@ -1,6 +1,6 @@
 import { join } from 'node:path';
 import { printAvailableNamespacesAndThemes } from './sass/namespace-config-parser.mts';
-import type { GlobalSettings } from '../settings.mts';
+import { resolveNamespaceJson, type GlobalSettings } from '../settings.mts';
 
 export interface CliArguments {
     mode: string;
@@ -97,7 +97,7 @@ export const parseCliArguments = (globalSettings: GlobalSettings): CliArguments 
     const pathToConfig = join(globalSettings.context, configPath);
 
     if (showInfo) {
-        printAvailableNamespacesAndThemes(pathToConfig);
+        printAvailableNamespacesAndThemes(resolveNamespaceJson(pathToConfig, globalSettings));
     }
 
     return {

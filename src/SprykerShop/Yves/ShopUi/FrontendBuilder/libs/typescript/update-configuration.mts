@@ -43,5 +43,7 @@ const isInvokedAsScript =
     process.argv[1] !== undefined && basename(process.argv[1]) === basename(fileURLToPath(import.meta.url));
 
 if (isInvokedAsScript) {
-    await updateYvesConfiguration(await loadProjectGlobalSettings());
+    const globalSettings = await loadProjectGlobalSettings();
+    console.log(`Build configuration: ${globalSettings.buildConfigurationSource}`);
+    await updateYvesConfiguration(globalSettings);
 }

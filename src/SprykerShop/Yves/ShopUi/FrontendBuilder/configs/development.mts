@@ -12,7 +12,12 @@ import { cleanDirs } from '../libs/webpack/clean-dirs.mts';
 import { extractIconSprites } from '../libs/webpack/icon-sprite-extractor.mts';
 import { runBuildHooks } from '../libs/webpack/build-hooks.mts';
 import { buildDesignTokensCss } from '../libs/webpack/design-tokens.mts';
-import { buildLegacyOrphanStyleNotice, findLegacyOrphanStyles } from '../libs/webpack/legacy-style-rescue.mts';
+import {
+    buildLegacyOrphanStyleNotice,
+    buildShadowedLegacyStyleNotice,
+    findLegacyOrphanStyles,
+} from '../libs/webpack/legacy-style-rescue.mts';
+import { buildWebpackEntries } from '../libs/webpack/entry-points.mts';
 import {
     createErrorTranslatingSassImplementation,
     createSassInjectionImporterFactory,
@@ -68,11 +73,12 @@ export const getConfiguration = async (appSettings: AppSettings): Promise<BuildC
         patterns: ['**/Theme/*/styles/**/*.scss', '!**/__tests__/**'],
     });
 
-    // `styles` arrives in finder directory order (assetsSourceDirs), so on duplicate mixin
-    // names the later file wins, mirroring the legacy "last @import wins" precedence. The order
-    // is `core, sprykerCore, eco, features, project` (project last) — a deliberate divergence
-    // from master's legacy builder (which had features last); see the `sources` note in
-    // settings.mts for why project-last is the intended contract.
+    // `styles` arrives in finder order — the default theme first, then the current theme, each in
+    // directory order (assetsSourceDirs) — so on duplicate mixin names the later file wins: the
+    // current theme over the default theme, and within a theme `core, sprykerCore, eco, features,
+    // project` (project last), mirroring the legacy "last @import wins" precedence and the
+    // entry-point precedence. Project-last is a deliberate divergence from master's legacy builder
+    // (which had features last); see the `sources` note in settings.mts.
     const mixinIndex = await createMixinIndex({
         componentStyleFilePaths: styles,
         sharedStyleFilePaths,
@@ -108,8 +114,9 @@ export const getConfiguration = async (appSettings: AppSettings): Promise<BuildC
 
     // Modules shipped before the builder migration may still carry self-emitting component styles
     // with no entry (legacy "the file exists, therefore it is in the bundle" contract). They are
-    // supported silently — the list is diagnostic output, visible only under --debug-injection.
-    const legacyOrphanStyles = findLegacyOrphanStyles({
+    // supported silently, and a self-emitting file of a component that another directory provides
+    // is skipped silently — both lists are diagnostic output, visible only under --debug-injection.
+    const { rescuedFilePaths: legacyOrphanStyles, shadowed: shadowedLegacyStyles } = findLegacyOrphanStyles({
         componentStyleFilePaths: styles,
         entryPointFilePaths: componentEntryPoints,
     });
@@ -117,6 +124,9 @@ export const getConfiguration = async (appSettings: AppSettings): Promise<BuildC
     if (isInjectionDebuggingEnabled) {
         legacyOrphanStyles.forEach((filePath) =>
             console.log(`[debug-injection] ${buildLegacyOrphanStyleNotice(filePath)}`),
+        );
+        shadowedLegacyStyles.forEach(({ filePath, providedBy }) =>
+            console.log(`[debug-injection] ${buildShadowedLegacyStyleNotice(filePath, providedBy)}`),
         );
     }
 
@@ -153,31 +163,20 @@ export const getConfiguration = async (appSettings: AppSettings): Promise<BuildC
                 warnings: true,
             },
 
-            // These app roots (vendor.ts, app.ts, basic.scss, util.scss) are required build inputs;
+            // The app roots (vendor.ts, app.ts, basic.scss, util.scss) are required build inputs;
             // findAppEntryPoint types them as possibly-undefined, so the build contract is asserted here.
-            // Rescued legacy styles come before the declared entry points: the legacy bundle laid
-            // them out in finder order (core first, project last), so a project component that
-            // competes with a rescued vendor rule must stay later in the cascade and keep winning.
-            entry: {
-                vendor: vendorTs!,
-                app: [appTs!, ...legacyOrphanStyles, ...componentEntryPoints, ...hookEntries.app],
-                // Design tokens go first: token definitions must precede every style that
-                // consumes them, including basic.scss.
-                critical: [
-                    ...(designTokensCss ? [designTokensCss] : []),
-                    ...hookEntries.critical,
-                    basicScss!,
-                    ...criticalOrphanStyles,
-                    ...criticalEntryPoints,
-                ],
-                'non-critical': [
-                    ...hookEntries.nonCritical,
-                    ...nonCriticalOrphanStyles,
-                    ...nonCriticalEntryPoints,
-                    utilScss!,
-                ],
-                util: utilScss!,
-            },
+            entry: buildWebpackEntries({
+                vendorEntryPath: vendorTs!,
+                appEntryPath: appTs!,
+                basicStylePath: basicScss!,
+                utilStylePath: utilScss!,
+                designTokensStylePath: designTokensCss,
+                criticalComponentEntryPaths: criticalEntryPoints,
+                nonCriticalComponentEntryPaths: nonCriticalEntryPoints,
+                criticalRescuedStylePaths: criticalOrphanStyles,
+                nonCriticalRescuedStylePaths: nonCriticalOrphanStyles,
+                hookContributions: hookEntries,
+            }),
 
             output: {
                 path: join(appSettings.context, appSettings.paths.public),

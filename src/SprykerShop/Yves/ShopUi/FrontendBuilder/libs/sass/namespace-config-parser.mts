@@ -1,5 +1,5 @@
-import { readFileSync } from 'node:fs';
 import type { CliArguments } from '../command-line-parser.mts';
+import type { NamespaceJson } from '../../settings.mts';
 
 export interface NamespaceConfig {
     namespace: string;
@@ -8,16 +8,7 @@ export interface NamespaceConfig {
     codeBucket: string;
 }
 
-interface NamespaceConfigFile {
-    path: string;
-    staticPath: string;
-    namespaces: NamespaceConfig[];
-}
-
-const loadNamespaceJson = (pathToConfig: string): NamespaceConfigFile => JSON.parse(readFileSync(pathToConfig, 'utf8'));
-
-const getNamespaceMap = (pathToConfig: string): Map<string, NamespaceConfig> => {
-    const namespaceJson = loadNamespaceJson(pathToConfig);
+const getNamespaceMap = (namespaceJson: NamespaceJson): Map<string, NamespaceConfig> => {
     const namespaceMap = new Map<string, NamespaceConfig>();
 
     namespaceJson.namespaces.forEach((item) => {
@@ -32,9 +23,7 @@ const printWrongNamespaceMessage = (namespace: string): void => {
     process.exit(1);
 };
 
-export const printAvailableNamespacesAndThemes = (pathToConfig: string): void => {
-    const namespaceJson = loadNamespaceJson(pathToConfig);
-
+export const printAvailableNamespacesAndThemes = (namespaceJson: NamespaceJson): void => {
     console.log('Namespaces with available themes:');
     namespaceJson.namespaces.forEach((namespaceConfig) => {
         console.log(`- ${namespaceConfig.namespace}`);
@@ -48,8 +37,11 @@ export const printAvailableNamespacesAndThemes = (pathToConfig: string): void =>
     process.exit();
 };
 
-export const getFilteredNamespaceConfigList = (requestedArguments: CliArguments): NamespaceConfig[] => {
-    const namespaceMap = getNamespaceMap(requestedArguments.pathToConfig);
+export const getFilteredNamespaceConfigList = (
+    requestedArguments: CliArguments,
+    namespaceJson: NamespaceJson,
+): NamespaceConfig[] => {
+    const namespaceMap = getNamespaceMap(namespaceJson);
 
     if (!requestedArguments.namespaces.length) {
         requestedArguments.namespaces = Array.from(namespaceMap.keys());

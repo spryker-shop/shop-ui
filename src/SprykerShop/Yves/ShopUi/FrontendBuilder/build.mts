@@ -1,5 +1,11 @@
 import { pathToFileURL } from 'node:url';
-import { defaultGlobalSettings, getAppSettings, loadProjectGlobalSettings, resolveSourceLayout } from './settings.mts';
+import {
+    defaultGlobalSettings,
+    getAppSettings,
+    loadProjectGlobalSettings,
+    resolveNamespaceJson,
+    resolveSourceLayout,
+} from './settings.mts';
 import type { AppSettings, GlobalSettings } from './settings.mts';
 import { parseCliArguments } from './libs/command-line-parser.mts';
 import { getFilteredNamespaceConfigList } from './libs/sass/namespace-config-parser.mts';
@@ -25,6 +31,7 @@ export const run = async (globalSettings: GlobalSettings = defaultGlobalSettings
     // The layout decides where every component is looked up, so make the choice visible: a build
     // that finds no components is almost always a layout or working-directory problem.
     console.log(`Source layout: ${resolveSourceLayout(globalSettings.context).name}`);
+    console.log(`Build configuration: ${globalSettings.buildConfigurationSource}`);
 
     const configModule = modeConfigMap[requestedArguments.mode];
 
@@ -34,7 +41,10 @@ export const run = async (globalSettings: GlobalSettings = defaultGlobalSettings
     }
 
     const { default: getConfiguration } = await configModule();
-    const namespaceConfigList = getFilteredNamespaceConfigList(requestedArguments);
+    const namespaceConfigList = getFilteredNamespaceConfigList(
+        requestedArguments,
+        resolveNamespaceJson(requestedArguments.pathToConfig, globalSettings),
+    );
     const configurationPromises = getAppSettings(
         namespaceConfigList,
         requestedArguments.pathToConfig,
