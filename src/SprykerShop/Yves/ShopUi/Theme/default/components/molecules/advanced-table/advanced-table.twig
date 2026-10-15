@@ -33,10 +33,21 @@
 
                                 <th {{ _self.sortingAttributes(columnData, headColClass, config, data) }}>
                                     {% block headCol %}
-                                        <div class="{{ config.name }}__heading">
-                                            {{ columnData.title | default('') | trans }}
-                                            {{ _self.sortingIcon(columnData, config, data) }}
-                                        </div>
+                                        {% if columnData.head.type | default(null) %}
+                                            {% include molecule("advanced-table-#{columnData.head.type}-cell") with {
+                                                data: {
+                                                    cell: columnData.headCell | default(null),
+                                                    config: columnData,
+                                                    isHead: true,
+                                                },
+                                            } only %}
+                                        {% else %}
+                                            <div class="{{ config.name }}__heading">
+                                                {{ columnData.title | default('') | trans }}
+                                                {{ _self.hint(columnData) }}
+                                                {{ _self.sortingIcon(columnData, config, data) }}
+                                            </div>
+                                        {% endif %}
                                     {% endblock %}
                                 </th>
                             {% endfor %}
@@ -47,7 +58,10 @@
                 {% block tbody %}
                     <tbody class="{{ _self.renderClass(config.name ~ '__body', modifiers) }}">
                         {% for row in data.rows %}
-                            <tr class="{{ _self.renderClass(config.name ~ '__row', modifiers) }}">
+                            {# Optional row hooks: row._row.class (string) and row._row.attributes (map). #}
+                            <tr
+                                class="{{ _self.renderClass(config.name ~ '__row', modifiers, row._row.class | default('')) }}"
+                                {{ _self.renderAttributes(row._row.attributes | default({})) }}>
                                 {% for columnData in data.columns %}
                                     {% set cell = row[columnData.id] | default(null) %}
 
@@ -122,6 +136,19 @@
             sort-direction="{{ (orderDirection == 'ASC') ? 'DESC' : 'ASC' }}"
         {% endif %}
         class="{{ class }}"
+    {%- endmacro -%}
+
+    {%- macro hint(columnData) -%}
+        {% if columnData.hint | default(null) %}
+            {% include molecule('tooltip-message') with {
+                data: {
+                    text: columnData.hint.text | trans,
+                    hasTrigger: true,
+                    triggerLabel: (columnData.hint.label | default(columnData.title | default(''))) | trans,
+                    triggerAttributes: columnData.hint.attributes | default({}),
+                },
+            } only %}
+        {% endif %}
     {%- endmacro -%}
 
     {%- macro sortingIcon(columnData, config, data) -%}

@@ -1,0 +1,52 @@
+{% extends model('component') %}
+
+{% define config = {
+    name: 'advanced-table-input-cell',
+} %}
+
+{% define data = {
+    cell: {
+        field: null,
+        fieldAttributes: {},
+        cellText: '',
+    },
+    config: {
+        title: '',
+    },
+} %}
+
+{% block component %}
+    {% if data.cell %}
+        {{ parent() }}
+    {% endif %}
+{% endblock %}
+
+{% block body %}
+    {% set fieldAriaLabel = data.config.title | default('') | trans %}
+
+    {% block field %}
+        {% if data.cell.field %}
+            <div>
+                {{ form_widget(data.cell.field, {
+                    attr: {
+                        'aria-label': fieldAriaLabel,
+                    }
+                    | merge(data.cell.fieldAttributes | default({}))
+                    | merge({class: "#{config.name}__field #{data.cell.fieldAttributes.class | default('')}" | trim}),
+                }) }}
+                {{ form_errors(data.cell.field) }}
+            </div>
+        {% else %}
+            <input
+                class="{{ config.name }}__field"
+                {% if fieldAriaLabel %}aria-label="{{ fieldAriaLabel }}"{% endif %}
+                {{ _self.renderAttributes(data.cell.fieldAttributes) }}>
+        {% endif %}
+    {% endblock %}
+
+    {% block text %}
+        {% if data.cell.cellText %}
+            <span class="{{ config.name }}__text">{{ data.cell.cellText | trans }}</span>
+        {% endif %}
+    {% endblock %}
+{% endblock %}

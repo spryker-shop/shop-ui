@@ -12,6 +12,7 @@ $shop-ui-tooltip-message-arrow-size: 0.5rem;
         min-width: 20rem;
         margin-top: -$shop-ui-tooltip-message-arrow-size;
         transform: translateX(-50%);
+        color: $setting-color-black;
 
         @if meta.mixin-exists(shop-ui-tooltip-message-base-hook) {
             @include shop-ui-tooltip-message-base-hook;
@@ -29,6 +30,8 @@ $shop-ui-tooltip-message-arrow-size: 0.5rem;
             border: 1px solid $setting-color-light;
             text-align: center;
             z-index: $setting-zi-element + 1;
+            white-space: normal;
+            font-weight: normal;
         }
 
         &__arrow {
@@ -42,9 +45,36 @@ $shop-ui-tooltip-message-arrow-size: 0.5rem;
             z-index: $setting-zi-element;
         }
 
-        &--top {
+        &--anchored &__arrow {
+            display: none;
+        }
+
+        &--top,
+        &--anchored {
             bottom: calc(100% + #{$shop-ui-tooltip-message-arrow-size});
             left: 50%;
+        }
+
+        @supports (position-anchor: --a) and (anchor-scope: --a) {
+            &--anchored {
+                position: fixed;
+                position-anchor: --tooltip-message-anchor;
+                position-area: top;
+                position-try-fallbacks: flip-block;
+                inset: auto;
+                width: max-content;
+                min-width: 0;
+                max-width: 20rem;
+                margin: $shop-ui-tooltip-message-arrow-size 0;
+                transform: none;
+                z-index: $setting-zi-side-drawer - 1;
+                text-align: left;
+            }
+
+            &--anchored &__text {
+                position: static;
+                float: none;
+            }
         }
 
         @each $action, $setting-color-action in $setting-color-actions {
@@ -52,6 +82,20 @@ $shop-ui-tooltip-message-arrow-size: 0.5rem;
         }
 
         @content;
+    }
+
+    :has(> #{$name}--anchored) {
+        position: relative;
+
+        @supports (position-anchor: --a) and (anchor-scope: --a) {
+            anchor-name: --tooltip-message-anchor;
+            anchor-scope: --tooltip-message-anchor;
+        }
+
+        &:hover > #{$name}--anchored,
+        &:focus-within > #{$name}--anchored {
+            @include helper-visibility-visible;
+        }
     }
 }
 

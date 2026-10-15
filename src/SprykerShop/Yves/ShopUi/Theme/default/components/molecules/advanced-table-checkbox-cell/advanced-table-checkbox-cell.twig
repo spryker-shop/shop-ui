@@ -1,0 +1,57 @@
+{% extends model('component') %}
+
+{% define config = {
+    name: 'advanced-table-checkbox-cell',
+    tag: 'advanced-table-checkbox-cell',
+} %}
+
+{% define data = {
+    cell: {
+        title: '',
+        name: false,
+        value: false,
+        checked: false,
+        disabled: false,
+        label: '',
+    },
+    config: {
+        title: '',
+        options: {
+            selectable: false,
+        },
+    },
+    isHead: false,
+} %}
+
+{# plain: just the input; select: marks its row; head: selects all the rows #}
+{% set mode = data.isHead ? 'head' : (data.config.options.selectable | default(false) ? 'select' : 'plain') %}
+
+{% define attributes = {
+    mode: mode,
+    'mode-head': 'head',
+    'mode-select': 'select',
+} %}
+
+{% block component %}
+    {% if data.cell or data.isHead %}
+        {{ parent() }}
+    {% endif %}
+{% endblock %}
+
+{% block body %}
+    {% set cell = data.cell is iterable ? data.cell : {} %}
+    {% set ariaLabel = (cell.label | default(cell.title | default(data.config.title | default('')))) | trans %}
+
+    {% block input %}
+        <input
+            type="checkbox"
+            class="{{ config.name }}__input {{ config.jsName }}__input {{ config.jsName }}__input--{{ mode }}"
+            {% if ariaLabel %}aria-label="{{ ariaLabel }}"{% endif %}
+            {{ _self.renderAttributes({
+                name: cell.name | default(false),
+                value: cell.value | default(false),
+                checked: cell.checked | default(false) and not data.isHead,
+                disabled: cell.disabled | default(false),
+            }) }}>
+    {% endblock %}
+{% endblock %}

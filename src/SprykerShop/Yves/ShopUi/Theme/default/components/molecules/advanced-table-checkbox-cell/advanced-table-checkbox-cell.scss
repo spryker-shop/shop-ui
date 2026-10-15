@@ -1,0 +1,19 @@
+@use 'sass:meta';
+
+@mixin shop-ui-advanced-table-checkbox-cell($name: '.advanced-table-checkbox-cell') {
+    #{$name} {
+        display: inline-flex;
+        align-items: center;
+
+        @if meta.mixin-exists(shop-ui-advanced-table-checkbox-cell-base-hook) {
+            @include shop-ui-advanced-table-checkbox-cell-base-hook;
+        }
+
+        &__input {
+            margin: 0;
+            cursor: pointer;
+        }
+
+        @content;
+    }
+}

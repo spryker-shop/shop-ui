@@ -2,14 +2,62 @@
 
 {% define config = {
     name: 'tooltip-message',
-    tag: 'span'
+    tag: 'span',
 } %}
 
 {% define data = {
-    text: ''
+    text: '',
+    hasTrigger: false,
+    triggerLabel: '',
+    triggerIcon: 'action-default',
+    triggerAttributes: {},
 } %}
 
+{% block component %}
+    {% if not data.hasTrigger %}
+        {{ parent() }}
+    {% else %}
+        {% set tooltipId = attributes.id | default("#{config.name}-#{random()}") %}
+        {% set triggerClass = class %}
+
+        {% set modifiers = modifiers | merge(['anchored']) %}
+        {% set attributes = attributes | merge({ id: tooltipId }) %}
+        {% set class = '' %}
+        {% set tooltip %}{{ parent() }}{% endset %}
+
+        {{ block('trigger') }}
+    {% endif %}
+{% endblock %}
+
+{% block trigger %}
+    <span class="{{ config.name }}__trigger {% block triggerClass %}{{ triggerClass }}{% endblock %}"
+        tabindex="0"
+        role="button"
+        {% if data.triggerLabel %}
+            aria-label="{{ data.triggerLabel }}"
+            aria-describedby="{{ tooltipId }}"
+        {% else %}
+            aria-labelledby="{{ tooltipId }}"
+        {% endif %}
+        {{ componentAttributes(data.triggerAttributes) }}>
+
+        {% block triggerContent %}
+            {% include atom('icon') with {
+                data: {
+                    name: data.triggerIcon,
+                },
+            } only %}
+        {% endblock %}
+
+        {{ tooltip }}
+    </span>
+{% endblock %}
+
 {% block body %}
-    <span class="{{config.name}}__text">{{data.text}}</span>
-    <span class="{{config.name}}__arrow"></span>
+    {{ block('tooltipContent') }}
+{% endblock %}
+
+{% block tooltipContent %}
+    <span class="{{ config.name }}__text">{{ data.text }}</span>
+    <span class="{{ config.name }}__arrow"></span>
 {% endblock %}

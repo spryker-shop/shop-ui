@@ -1,0 +1,24 @@
+@use 'sass:meta';
+
+@mixin shop-ui-advanced-table-input-cell($name: '.advanced-table-input-cell') {
+    #{$name} {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+
+        @if meta.mixin-exists(shop-ui-advanced-table-input-cell-base-hook) {
+            @include shop-ui-advanced-table-input-cell-base-hook;
+        }
+
+        &__field {
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+
+        &__text {
+            flex: 0 0 auto;
+        }
+
+        @content;
+    }
+}

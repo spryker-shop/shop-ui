@@ -60,6 +60,12 @@
             &--highlighted {
                 background-color: $setting-color-lightest;
             }
+
+            &--selected {
+                #{$name}__col {
+                    background-color: $setting-color-lightest;
+                }
+            }
         }
 
         &__empty {
