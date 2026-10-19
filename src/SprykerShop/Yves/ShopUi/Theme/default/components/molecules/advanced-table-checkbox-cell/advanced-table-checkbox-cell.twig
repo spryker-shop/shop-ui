@@ -43,15 +43,19 @@
     {% set ariaLabel = (cell.label | default(cell.title | default(data.config.title | default('')))) | trans %}
 
     {% block input %}
-        <input
-            type="checkbox"
-            class="{{ config.name }}__input {{ config.jsName }}__input {{ config.jsName }}__input--{{ mode }}"
-            {% if ariaLabel %}aria-label="{{ ariaLabel }}"{% endif %}
-            {{ _self.renderAttributes({
+        {% embed atom('checkbox') with {
+            data: {
+                inputClass: config.name ~ '__input ' ~ config.jsName ~ '__input ' ~ config.jsName ~ '__input--' ~ mode,
+            },
+            attributes: {
                 name: cell.name | default(false),
                 value: cell.value | default(false),
                 checked: cell.checked | default(false) and not data.isHead,
                 disabled: cell.disabled | default(false),
-            }) }}>
+                'aria-label': ariaLabel | default(false),
+            },
+        } only %}
+            {%- block labelContainer -%}{%- endblock -%}
+        {% endembed %}
     {% endblock %}
 {% endblock %}

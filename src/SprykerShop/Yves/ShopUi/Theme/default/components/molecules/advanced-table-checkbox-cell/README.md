@@ -1,4 +1,4 @@
-Displays a checkbox within table cells. Three variants:
+Displays a checkbox (the `checkbox` atom, without a visible label) within table cells. Three variants:
 
 -   plain: a checkbox only (`columns[].type: 'checkbox'`);
 -   selectable: `columns[].options.selectable: true` — marks its row as selected (`advanced-table__row--selected`) and fires the bubbling `advanced-table-selection-change` event (`detail: {checked, row}`) on change;

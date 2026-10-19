@@ -9,11 +9,6 @@
             @include shop-ui-advanced-table-checkbox-cell-base-hook;
         }
 
-        &__input {
-            margin: 0;
-            cursor: pointer;
-        }
-
         @content;
     }
 }
