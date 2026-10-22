@@ -46,7 +46,7 @@
         "postcss-selector-parser": "~7.1.6",
         "sass-embedded": "~1.103.1",
         "sass-loader": "~17.0.1",
-        "style-dictionary": "~4.4.0",
+        "style-dictionary": "~5.7.0",
         "stylelint": "~17.14.1",
         "stylelint-config-standard-scss": "~17.0.0",
         "ts-jest": "~29.4.12",
