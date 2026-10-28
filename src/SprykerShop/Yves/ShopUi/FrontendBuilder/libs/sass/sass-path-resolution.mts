@@ -1,5 +1,6 @@
 import { statSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
+import type { AliasList } from '../webpack/alias.mts';
 
 export const isExistingFile = (filePath: string): boolean =>
     statSync(filePath, { throwIfNoEntry: false })?.isFile() ?? false;
@@ -22,32 +23,61 @@ const pickUnambiguousExistingFile = (
     return existingFiles[0] ?? null;
 };
 
-// Applies the Sass filesystem conventions to a request that may omit the extension or the
-// partial underscore: `x` matches `x.scss`/`_x.scss`, and a directory matches its `index.scss`.
-export const resolveWithSassConventions = (requestedPath: string, requestingFilePath: string | null): string | null => {
+const SASS_FILE_EXTENSION_PATTERN = /\.(?:scss|sass|css)$/i;
+
+// `x` matches `x.scss`/`_x.scss`; a request that names its extension matches itself and its partial.
+const buildFileCandidatePaths = (requestedPath: string): string[] => {
     const directory = dirname(requestedPath);
     const name = basename(requestedPath);
 
-    if (/\.(?:scss|sass|css)$/i.test(name)) {
-        const candidates = name.startsWith('_') ? [requestedPath] : [requestedPath, join(directory, `_${name}`)];
-
-        return pickUnambiguousExistingFile(candidates, requestedPath, requestingFilePath);
+    if (SASS_FILE_EXTENSION_PATTERN.test(name)) {
+        return name.startsWith('_') ? [requestedPath] : [requestedPath, join(directory, `_${name}`)];
     }
 
-    const fileCandidates = name.startsWith('_')
+    return name.startsWith('_')
         ? [join(directory, `${name}.scss`)]
         : [join(directory, `${name}.scss`), join(directory, `_${name}.scss`)];
-    const fileMatch = pickUnambiguousExistingFile(fileCandidates, requestedPath, requestingFilePath);
+};
 
-    if (fileMatch) {
-        return fileMatch;
+// Only an extensionless request may name a directory.
+const buildIndexCandidatePaths = (requestedPath: string): string[] =>
+    SASS_FILE_EXTENSION_PATTERN.test(basename(requestedPath))
+        ? []
+        : [join(requestedPath, 'index.scss'), join(requestedPath, '_index.scss')];
+
+// Applies the Sass filesystem conventions to a request that may omit the extension or the
+// partial underscore: `x` matches `x.scss`/`_x.scss`, and a directory matches its `index.scss`.
+export const resolveWithSassConventions = (requestedPath: string, requestingFilePath: string | null): string | null =>
+    pickUnambiguousExistingFile(buildFileCandidatePaths(requestedPath), requestedPath, requestingFilePath) ??
+    pickUnambiguousExistingFile(buildIndexCandidatePaths(requestedPath), requestedPath, requestingFilePath);
+
+// webpack tries the targets of an alias in order and takes the first that resolves; a Sass load through
+// the same alias has to land on the same file, or a project file would shadow the core one in scripts only.
+// Every candidate a missed target offered is reported: creating one of them later changes the result,
+// so a persistent cache has to treat each as a dependency that does not exist yet.
+export const resolveThroughAliasTargets = (
+    aliasTarget: AliasList[string],
+    pathBelowAlias: string,
+    requestingFilePath: string | null,
+    onCandidateMissing: (candidatePath: string) => void = () => undefined,
+): string | null => {
+    for (const targetPath of [aliasTarget].flat()) {
+        const requestedPath = join(targetPath, pathBelowAlias);
+        const resolvedPath = resolveWithSassConventions(requestedPath, requestingFilePath);
+
+        if (resolvedPath !== null) {
+            return resolvedPath;
+        }
+
+        for (const candidatePath of [
+            ...buildFileCandidatePaths(requestedPath),
+            ...buildIndexCandidatePaths(requestedPath),
+        ]) {
+            onCandidateMissing(candidatePath);
+        }
     }
 
-    return pickUnambiguousExistingFile(
-        [join(requestedPath, 'index.scss'), join(requestedPath, '_index.scss')],
-        requestedPath,
-        requestingFilePath,
-    );
+    return null;
 };
 
 /**
@@ -58,7 +88,7 @@ export const resolveWithSassConventions = (requestedPath: string, requestingFile
 export const resolveLoadRequest = (
     request: string,
     requestingFilePath: string,
-    aliasList: Record<string, string>,
+    aliasList: AliasList,
 ): string | null => {
     const bareRequest = request.startsWith('~') ? request.slice(1) : request;
 
@@ -70,8 +100,9 @@ export const resolveLoadRequest = (
 
     for (const aliasName of aliasNames) {
         if (bareRequest === aliasName || bareRequest.startsWith(`${aliasName}/`)) {
-            return resolveWithSassConventions(
-                join(aliasList[aliasName], bareRequest.slice(aliasName.length)),
+            return resolveThroughAliasTargets(
+                aliasList[aliasName],
+                bareRequest.slice(aliasName.length),
                 requestingFilePath,
             );
         }

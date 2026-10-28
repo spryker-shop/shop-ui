@@ -8,6 +8,7 @@ import {
     isInjectableStyleRootPath,
 } from '../../libs/sass/sass-injection-importer.mts';
 import type { MixinIndex } from '../../libs/sass/mixin-index.mts';
+import type { AliasList } from '../../libs/webpack/alias.mts';
 
 export interface CompileLoggerOptions {
     span?: { url?: URL; start?: { line: number } };
@@ -40,17 +41,19 @@ export const createInjectionCompiler = ({
     aliasList,
     projectWrapperPath = null,
     mixinIndex = undefined,
+    onCandidateMissing = undefined,
 }: {
-    aliasList: Record<string, string>;
+    aliasList: AliasList;
     projectWrapperPath?: string | null;
     mixinIndex?: MixinIndex;
+    onCandidateMissing?: (candidatePath: string) => void;
 }) => {
     const { buildInjectionBanner, buildStyleRootBanner, createImporter } = createSassInjectionImporterFactory({
         aliasList,
         projectWrapperPath,
         ...(mixinIndex ? { mixinIndex } : {}),
     });
-    const importer = createImporter();
+    const importer = createImporter({ onCandidateMissing });
     const implementation = createErrorTranslatingSassImplementation(sassEmbedded);
 
     const compile = (source: string, sourceFilePath: string, { logger }: { logger?: CompileLogger } = {}) =>

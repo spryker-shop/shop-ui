@@ -5,6 +5,7 @@ import glob from 'fast-glob';
 import type { BuildHook } from './libs/webpack/build-hooks.mts';
 import type { NamespaceConfig } from './libs/sass/namespace-config-parser.mts';
 import type { FindSettings } from './libs/webpack/finder.mts';
+import type { SourceRoots } from './libs/aliases/alias-provider.mts';
 
 export interface IconSpriteConfig {
     sources: string[];
@@ -152,6 +153,11 @@ const resolveNamespaceDirectory = (context: string, namespace: string): string =
 
 // `project` is the root that holds the application entry and the key a settings file may replace.
 const PROJECT_NAMESPACE = 'Pyz';
+const PROJECT_SOURCE_KEY = 'project';
+
+// Every other namespace keeps its lower-cased name, so a key alone does not tell project from core.
+const toNamespaceSourceKey = (namespace: string): string =>
+    namespace === PROJECT_NAMESPACE ? PROJECT_SOURCE_KEY : namespace.toLowerCase();
 
 const SHOP_UI_HOME_NAMESPACE = 'SprykerShop';
 const ICON_SPRITE_THEME_RELATIVE_PATH = 'ShopUi/Theme/default/components/atoms/icon-sprite/icon-sprite.twig';
@@ -160,16 +166,16 @@ const ICON_SPRITE_THEME_RELATIVE_PATH = 'ShopUi/Theme/default/components/atoms/i
 // A project root is emitted in both layout shapes (split per module and flat); an empty shape matches nothing.
 const buildGeneratedSources = (context: string, generated: GeneratedBuildConfiguration): Record<string, string> => {
     const sources: Record<string, string> = {};
-    const keyOf = (namespace: string): string =>
-        namespace === PROJECT_NAMESPACE ? 'project' : namespace.toLowerCase();
 
     [...generated.coreNamespaces].reverse().forEach((namespace) => {
-        sources[keyOf(namespace)] = resolveNamespaceDirectory(context, namespace);
+        sources[toNamespaceSourceKey(namespace)] = resolveNamespaceDirectory(context, namespace);
     });
     [...generated.projectNamespaces].reverse().forEach((namespace) => {
+        const sourceKey = toNamespaceSourceKey(namespace);
+
         // Split shape last: its key (`project` for Pyz) stays the strongest root, also when a settings file replaces it.
-        sources[`${keyOf(namespace)}/Yves`] = `${resolveNamespaceDirectory(context, namespace)}/Yves`;
-        sources[keyOf(namespace)] = `${resolveNamespaceDirectory(context, namespace)}/*/src/${namespace}/Yves`;
+        sources[`${sourceKey}/Yves`] = `${resolveNamespaceDirectory(context, namespace)}/Yves`;
+        sources[sourceKey] = `${resolveNamespaceDirectory(context, namespace)}/*/src/${namespace}/Yves`;
     });
 
     return sources;
@@ -243,17 +249,53 @@ export const applyGeneratedBuildConfiguration = (
 };
 
 const OWNED_SOURCE_PREFIX = './src/';
-const YVES_DIRECTORY_NAME = 'Yves';
+export const YVES_DIRECTORY_NAME = 'Yves';
 
 // Only the sources the repository itself contains are linted. In a project layout the core, eco and
 // feature roots point into vendor/, which is installed code and not ours to report on.
 export const getOwnedSourceRoots = (globalSettings: GlobalSettings): string[] =>
     Object.values(globalSettings.paths.sources).filter((sourceRoot) => sourceRoot.startsWith(OWNED_SOURCE_PREFIX));
 
-export const getProjectSourceRoots = (globalSettings: GlobalSettings): string[] =>
-    Object.entries(globalSettings.paths.sources)
-        .filter(([sourceKey]) => sourceKey === 'project' || sourceKey.startsWith('project/'))
+const isSourceKeyOfNamespace = (sourceKey: string, namespaceSourceKey: string): boolean =>
+    sourceKey === namespaceSourceKey || sourceKey.startsWith(`${namespaceSourceKey}/`);
+
+// The backend namespace list decides what is project code; without it only the `project` key is.
+// A root a settings file adds under any other key counts as core.
+const getProjectNamespaceSourceKeys = (globalSettings: GlobalSettings): string[] =>
+    globalSettings.generatedBuildConfiguration?.projectNamespaces.map(toNamespaceSourceKey) ?? [PROJECT_SOURCE_KEY];
+
+/** One list per project namespace, strongest namespace first, as `KernelConstants::PROJECT_NAMESPACES` orders them. */
+const getProjectSourceRootsByNamespace = (globalSettings: GlobalSettings): string[][] =>
+    getProjectNamespaceSourceKeys(globalSettings).map((namespaceSourceKey) =>
+        Object.entries(globalSettings.paths.sources)
+            .filter(([sourceKey]) => isSourceKeyOfNamespace(sourceKey, namespaceSourceKey))
+            .map(([, sourceRoot]) => sourceRoot),
+    );
+
+// In source order, the strongest last, as the finder lets a later root win.
+export const getProjectSourceRoots = (globalSettings: GlobalSettings): string[] => {
+    const namespaceSourceKeys = getProjectNamespaceSourceKeys(globalSettings);
+
+    return Object.entries(globalSettings.paths.sources)
+        .filter(([sourceKey]) =>
+            namespaceSourceKeys.some((namespaceSourceKey) => isSourceKeyOfNamespace(sourceKey, namespaceSourceKey)),
+        )
         .map(([, sourceRoot]) => sourceRoot);
+};
+
+// Classified once here; the alias providers take the split as given. The project roots of one namespace stay
+// together, the strongest namespace first.
+export const getSourceRoots = (globalSettings: GlobalSettings): SourceRoots => {
+    const projectSourceRoots = getProjectSourceRootsByNamespace(globalSettings).flat();
+
+    return {
+        context: globalSettings.context,
+        core: Object.values(globalSettings.paths.sources).filter(
+            (sourceRoot) => !projectSourceRoots.includes(sourceRoot),
+        ),
+        project: projectSourceRoots,
+    };
+};
 
 export const isYvesLayerRoot = (sourceRoot: string): boolean => sourceRoot.endsWith(`/${YVES_DIRECTORY_NAME}`);
 

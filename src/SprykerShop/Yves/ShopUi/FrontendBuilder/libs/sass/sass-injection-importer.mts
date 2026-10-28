@@ -1,9 +1,10 @@
 import { readFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { isExistingFile, resolveWithSassConventions } from './sass-path-resolution.mts';
+import { isExistingFile, resolveThroughAliasTargets, resolveWithSassConventions } from './sass-path-resolution.mts';
 import { createStyleFileInjectionDecider } from './style-module-context.mts';
 import type { MixinIndex } from './mixin-index.mts';
+import type { AliasList } from '../webpack/alias.mts';
 
 // Structural shapes for the sass-embedded interop boundary. sass-embedded ships its own richer
 // types, but only the members this importer touches are modelled here, so the wrapper stays
@@ -280,12 +281,13 @@ export const createSassInjectionImporterFactory = ({
     mixinIndex = createNoOpMixinIndex(),
     isInjectionDebuggingEnabled = false,
 }: {
-    aliasList: Record<string, string>;
+    aliasList: AliasList;
     projectWrapperPath?: string | null;
     mixinIndex?: MixinIndex;
     isInjectionDebuggingEnabled?: boolean;
 }) => {
-    const coreShopUiThemePath = aliasList.ShopUi;
+    // A hand-written ShopUi alias with several targets keeps naming the core theme by its first one.
+    const coreShopUiThemePath = [aliasList.ShopUi ?? []].flat()[0];
 
     if (!coreShopUiThemePath) {
         throw new Error(
@@ -319,15 +321,21 @@ export const createSassInjectionImporterFactory = ({
         ([aliasNameA], [aliasNameB]) => aliasNameB.length - aliasNameA.length,
     );
 
-    const resolveAliasRequest = (request: string, requestingFilePath: string | null): string | null => {
-        for (const [aliasName, aliasTargetPath] of aliasEntries) {
+    const resolveAliasRequest = (
+        request: string,
+        requestingFilePath: string | null,
+        onCandidateMissing: ((candidatePath: string) => void) | undefined,
+    ): string | null => {
+        for (const [aliasName, aliasTarget] of aliasEntries) {
             if (request !== aliasName && !request.startsWith(`${aliasName}/`)) {
                 continue;
             }
 
-            return resolveWithSassConventions(
-                join(aliasTargetPath, request.slice(aliasName.length)),
+            return resolveThroughAliasTargets(
+                aliasTarget,
+                request.slice(aliasName.length),
                 requestingFilePath,
+                onCandidateMissing,
             );
         }
 
@@ -355,7 +363,15 @@ export const createSassInjectionImporterFactory = ({
     // closure and would be reported as unknown. Only the shared context is missing there.
     const buildStyleRootBanner = (content: string): string => sharedContextDeclarations(content).join(' ');
 
-    const createImporter = ({ onFileLoaded }: { onFileLoaded?: (loadedFilePath: string) => void } = {}) => ({
+    // `onCandidateMissing` receives every alias candidate that did not exist, so the loader can register it
+    // as a missing dependency: a project file created there later must invalidate the cached module.
+    const createImporter = ({
+        onFileLoaded,
+        onCandidateMissing,
+    }: {
+        onFileLoaded?: (loadedFilePath: string) => void;
+        onCandidateMissing?: (candidatePath: string) => void;
+    } = {}) => ({
         async canonicalize(
             requestUrl: string,
             canonicalizeContext: { containingUrl: URL | null },
@@ -405,7 +421,7 @@ export const createSassInjectionImporterFactory = ({
                 return canonicalUrlFromPath(isRequestFromProjectWrapper ? coreSharedPath : sharedTargetPath);
             }
 
-            const aliasResolvedPath = resolveAliasRequest(request, requestingFilePath);
+            const aliasResolvedPath = resolveAliasRequest(request, requestingFilePath, onCandidateMissing);
 
             if (aliasResolvedPath) {
                 return canonicalUrlFromPath(aliasResolvedPath);

@@ -137,7 +137,7 @@ describe('the Yves configuration', () => {
         expect(Object.keys(configuration.compilerOptions!)).toEqual(['paths']);
     });
 
-    it('includes only the Yves themes and the reload client of the monorepo layout', async () => {
+    it('includes the Yves themes, the Shared themes and the reload client of the monorepo layout', async () => {
         const { configuration } = await reconcileYvesConfiguration(settingsFor(createMonorepoRoot()));
 
         expect(configuration.include).toEqual([
@@ -146,11 +146,16 @@ describe('the Yves configuration', () => {
             `${BUILDER_LADDER}/vendor/spryker-eco/**/Yves/**/Theme/**/*.ts`,
             `${BUILDER_LADDER}/src/SprykerFeature/**/Yves/**/Theme/**/*.ts`,
             `${BUILDER_LADDER}/src/Pyz/*/src/Pyz/Yves/**/Theme/**/*.ts`,
+            `${BUILDER_LADDER}/src/SprykerShop/*/src/*/Shared/*/Theme/default/**/*.ts`,
+            `${BUILDER_LADDER}/src/Spryker/*/src/*/Shared/*/Theme/default/**/*.ts`,
+            `${BUILDER_LADDER}/vendor/spryker-eco/*/src/*/Shared/*/Theme/default/**/*.ts`,
+            `${BUILDER_LADDER}/src/SprykerFeature/*/src/*/Shared/*/Theme/default/**/*.ts`,
+            `${BUILDER_LADDER}/src/Pyz/*/src/Pyz/Shared/*/Theme/default/**/*.ts`,
             `${BUILDER_LADDER}/${BUILDER_DIRECTORY}/libs/reload/client/**/*.ts`,
         ]);
     });
 
-    it('includes only the Yves themes and the reload client of the project layout', async () => {
+    it('includes the Yves themes, the Shared themes and the reload client of the project layout', async () => {
         const { configuration } = await reconcileYvesConfiguration(projectSettingsFor(createProjectRoot()));
 
         expect(configuration.include).toEqual([
@@ -159,6 +164,11 @@ describe('the Yves configuration', () => {
             `${BUILDER_LADDER}/vendor/spryker-eco/**/Yves/**/Theme/**/*.ts`,
             `${BUILDER_LADDER}/vendor/spryker-feature/**/Yves/**/Theme/**/*.ts`,
             `${BUILDER_LADDER}/src/Pyz/Yves/**/Theme/**/*.ts`,
+            `${BUILDER_LADDER}/vendor/spryker-shop/*/src/*/Shared/*/Theme/default/**/*.ts`,
+            `${BUILDER_LADDER}/vendor/spryker/*/src/*/Shared/*/Theme/default/**/*.ts`,
+            `${BUILDER_LADDER}/vendor/spryker-eco/*/src/*/Shared/*/Theme/default/**/*.ts`,
+            `${BUILDER_LADDER}/vendor/spryker-feature/*/src/*/Shared/*/Theme/default/**/*.ts`,
+            `${BUILDER_LADDER}/src/Pyz/Shared/*/Theme/default/**/*.ts`,
             `${BUILDER_LADDER}/${PROJECT_BUILDER_DIRECTORY}/libs/reload/client/**/*.ts`,
         ]);
     });
@@ -177,96 +187,40 @@ describe('the Yves configuration', () => {
     });
 });
 
-describe('the theme aliases', () => {
-    it('points a core module alias at the core theme in vendor/ in the project layout', async () => {
-        const { configuration } = await reconcileYvesConfiguration(projectSettingsFor(createProjectWithThemeImports()));
+describe('the aliases', () => {
+    const VENDOR_SHARED_THEME = 'vendor/spryker-feature/ai-commerce/src/SprykerFeature/Shared/AiCommerce/Theme/default';
+    const CORE_SHARED_THEME = 'src/SprykerFeature/AiCommerce/src/SprykerFeature/Shared/AiCommerce/Theme/default';
 
-        expect(configuration.compilerOptions!.paths!['ShopUi/*']).toEqual([
-            `${BUILDER_LADDER}/${CORE_SHOP_UI_THEME}/*`,
-        ]);
-    });
-
-    it('addresses the project theme as src/<Module>, so the core module keeps its own alias', async () => {
-        const { configuration } = await reconcileYvesConfiguration(projectSettingsFor(createProjectWithThemeImports()));
-
-        expect(configuration.compilerOptions!.paths!['src/ShopUi/*']).toEqual([
-            `${BUILDER_LADDER}/${PROJECT_SHOP_UI_THEME}/*`,
-        ]);
-    });
-
-    it('finds a module imported lazily with bundler comments between import( and a string on the next line', async () => {
+    it('writes the aliases of every provider relative to the Yves configuration', async () => {
         const context = createProjectWithThemeImports();
-        writeSource(
-            context,
-            'vendor/spryker-shop/multi-cart-widget/src/SprykerShop/Yves/MultiCartWidget/Theme/default/.keep',
-            '',
-        );
-        writeSource(
-            context,
-            `${PROJECT_SHOP_UI_THEME}/app/registry.ts`,
-            'register(\'mini-cart-radio\', () =>\n    import(\n        /* webpackMode: "lazy" */\n        /* webpackChunkName: "mini-cart-radio" */\n        \'MultiCartWidget/components/molecules/mini-cart-radio/mini-cart-radio\'\n    ),\n);\n',
-        );
+        writeSource(context, `${VENDOR_SHARED_THEME}/Chat/index.ts`, '');
 
         const { configuration } = await reconcileYvesConfiguration(projectSettingsFor(context));
+        const paths = configuration.compilerOptions!.paths!;
 
-        expect(configuration.compilerOptions!.paths!['MultiCartWidget/*']).toEqual([
-            `${BUILDER_LADDER}/vendor/spryker-shop/multi-cart-widget/src/SprykerShop/Yves/MultiCartWidget/Theme/default/*`,
-        ]);
+        expect(paths['ShopUi/*']).toEqual([`${BUILDER_LADDER}/${CORE_SHOP_UI_THEME}/*`]);
+        expect(paths['src/ShopUi/*']).toEqual([`${BUILDER_LADDER}/${PROJECT_SHOP_UI_THEME}/*`]);
+        expect(paths['@shared/ai-commerce/*']).toEqual([`${BUILDER_LADDER}/${VENDOR_SHARED_THEME}/*`]);
     });
 
-    it('finds core and project modules imported through double-quoted strings', async () => {
-        const context = createProjectWithThemeImports();
-        writeSource(
-            context,
-            'vendor/spryker-shop/product-set-widget/src/SprykerShop/Yves/ProductSetWidget/Theme/default/.keep',
-            '',
-        );
-        writeSource(context, 'src/Pyz/Yves/ProductImageWidget/Theme/default/.keep', '');
-        writeSource(
-            context,
-            `${PROJECT_SHOP_UI_THEME}/app/double-quoted.ts`,
-            'import "ProductSetWidget/styles/set";\nimport "src/ProductImageWidget/components/gallery/gallery";\n',
-        );
-
-        const { configuration } = await reconcileYvesConfiguration(projectSettingsFor(context));
-
-        expect(configuration.compilerOptions!.paths).toHaveProperty('ProductSetWidget/*');
-        expect(configuration.compilerOptions!.paths).toHaveProperty('src/ProductImageWidget/*');
-    });
-
-    it('emits no project alias for a project theme nothing imports through src/<Module>', async () => {
-        const context = createProjectWithThemeImports();
-        writeSource(context, 'src/Pyz/Yves/CompanyWidget/Theme/default/components/atoms/logo/logo.ts', '');
-
-        const { configuration } = await reconcileYvesConfiguration(projectSettingsFor(context));
-
-        expect(configuration.compilerOptions!.paths).not.toHaveProperty('src/CompanyWidget/*');
-    });
-
-    it('emits no project alias for an imported src/<Module> whose project theme does not exist', async () => {
-        const context = createProjectWithThemeImports();
-        writeSource(context, `${PROJECT_SHOP_UI_THEME}/styles/basic.scss`, "@use 'src/MissingWidget/styles/shared';\n");
-
-        const { configuration } = await reconcileYvesConfiguration(projectSettingsFor(context));
-
-        expect(configuration.compilerOptions!.paths).not.toHaveProperty('src/MissingWidget/*');
-    });
-
-    it('finds the project theme under the per-module project tree of the monorepo layout', async () => {
+    it('replaces a stale Shared alias instead of keeping it as a hand-written one', async () => {
         const context = createMonorepoRoot();
-        const monorepoProjectTheme = 'src/Pyz/ShopUi/src/Pyz/Yves/ShopUi/Theme/default';
-        writeSource(context, `${monorepoProjectTheme}/components/atoms/title/title.ts`, '');
-        writeSource(
-            context,
-            'src/SprykerShop/CartPage/src/SprykerShop/Yves/CartPage/Theme/default/views/cart/cart.scss',
-            "@import 'src/ShopUi/components/atoms/title/title';\n",
-        );
+        writeSource(context, `${CORE_SHARED_THEME}/Chat/index.ts`, '');
+        writeBuildConfiguration(context, {
+            compilerOptions: {
+                paths: {
+                    '@shared/ai-commerce/*': [`${BUILDER_LADDER}/src/Pyz/Removed/Theme/default/*`],
+                    '@shared/removed-module/*': [`${BUILDER_LADDER}/src/Pyz/Removed/Theme/default/*`],
+                },
+            },
+        });
 
         const { configuration } = await reconcileYvesConfiguration(settingsFor(context));
 
-        expect(configuration.compilerOptions!.paths!['src/ShopUi/*']).toEqual([
-            `${BUILDER_LADDER}/${monorepoProjectTheme}/*`,
+        expect(configuration.compilerOptions!.paths!['@shared/ai-commerce/*']).toEqual([
+            `${BUILDER_LADDER}/${CORE_SHARED_THEME}/*`,
         ]);
+        expect(configuration.compilerOptions!.paths).not.toHaveProperty('@shared/removed-module/*');
     });
 });
 
@@ -288,6 +242,19 @@ describe('a custom project namespace', () => {
             expect.arrayContaining([
                 `${BUILDER_LADDER}/src/Pyz/Yves/**/Theme/**/*.ts`,
                 `${BUILDER_LADDER}/src/Acme/Yves/**/Theme/**/*.ts`,
+            ]),
+        );
+    });
+
+    it('type-checks the Shared themes of Pyz and of a namespace registered next to it', async () => {
+        const { configuration } = await reconcileYvesConfiguration(
+            namespacedSettingsFor(createProjectRoot(), { acme: CUSTOM_NAMESPACE_ROOT }),
+        );
+
+        expect(configuration.include).toEqual(
+            expect.arrayContaining([
+                `${BUILDER_LADDER}/src/Pyz/Shared/*/Theme/default/**/*.ts`,
+                `${BUILDER_LADDER}/src/Acme/Shared/*/Theme/default/**/*.ts`,
             ]),
         );
     });

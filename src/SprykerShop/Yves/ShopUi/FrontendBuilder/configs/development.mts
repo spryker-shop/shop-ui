@@ -100,6 +100,9 @@ export const getConfiguration = async (appSettings: AppSettings): Promise<BuildC
     // The injected Sass output depends on the mixin index, which webpack's filesystem cache
     // cannot observe — the cache version must change whenever the index changes.
     const mixinIndexHash = createHash('sha256').update(mixinIndex.getFingerprint()).digest('hex');
+    // Cached resolutions do not record the alias they went through: the first project Shared theme of a
+    // module turns its alias into a list, and only a new cache version makes webpack resolve again.
+    const aliasListHash = createHash('sha256').update(JSON.stringify(alias)).digest('hex');
 
     const criticalEntryPoints = componentEntryPoints.filter(
         filePathFilter({
@@ -148,7 +151,7 @@ export const getConfiguration = async (appSettings: AppSettings): Promise<BuildC
 
             cache: {
                 type: 'filesystem',
-                version: `mixin-index-${mixinIndexHash}`,
+                version: `mixin-index-${mixinIndexHash}-alias-list-${aliasListHash}`,
                 buildDependencies: {
                     config: [import.meta.url],
                 },
@@ -280,11 +283,17 @@ export const getConfiguration = async (appSettings: AppSettings): Promise<BuildC
                                     // A function, not a plain object: the importer must register every
                                     // file it loads as a webpack dependency of the module being compiled
                                     // (sass-loader only registers `file:` URLs from `loadedUrls`, and the
-                                    // injection importer keeps component files under a custom scheme).
-                                    sassOptions: (loaderContext: { addDependency: (filePath: string) => void }) => {
+                                    // injection importer keeps component files under a custom scheme), and
+                                    // every alias candidate it missed as a missing one.
+                                    sassOptions: (loaderContext: {
+                                        addDependency: (filePath: string) => void;
+                                        addMissingDependency: (filePath: string) => void;
+                                    }) => {
                                         const sassInjectionImporter = createSassInjectionImporter({
                                             onFileLoaded: (loadedFilePath: string) =>
                                                 loaderContext.addDependency(loadedFilePath),
+                                            onCandidateMissing: (candidatePath: string) =>
+                                                loaderContext.addMissingDependency(candidatePath),
                                         });
 
                                         return {

@@ -144,7 +144,12 @@ describe('applying the generated build configuration', () => {
     it('takes the application entry from every project root, the strongest last', () => {
         const settings = applyGeneratedBuildConfiguration(settingsFor(createContext()), generated);
 
-        expect(getProjectSourceRoots(settings)).toEqual(['./src/Pyz/Yves', './src/Pyz/*/src/Pyz/Yves']);
+        expect(getProjectSourceRoots(settings)).toEqual([
+            './src/Pyz/Yves',
+            './src/Pyz/*/src/Pyz/Yves',
+            './src/Acme/Yves',
+            './src/Acme/*/src/Acme/Yves',
+        ]);
     });
 });
 

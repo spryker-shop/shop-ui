@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { resolveLoadRequest } from './sass-path-resolution.mts';
+import type { AliasList } from '../webpack/alias.mts';
 
 const LOAD_REQUEST_PATTERN = /@(?:use|forward|import)\s+(['"])([^'"]+)\1/g;
 const OWN_USE_PATTERN = /@use\s+['"]/;
@@ -17,7 +18,7 @@ const readFileOrEmpty = (filePath: string): string => {
  * can tell whether a file is part of shared itself. Nothing inside that closure may load shared —
  * that would make shared load through itself.
  */
-export const collectSharedClosure = (sharedRootPaths: string[], aliasList: Record<string, string>): Set<string> => {
+export const collectSharedClosure = (sharedRootPaths: string[], aliasList: AliasList): Set<string> => {
     const closure = new Set<string>();
     const pending = sharedRootPaths.filter((filePath) => filePath.length > 0);
 
@@ -62,7 +63,7 @@ export const createStyleFileInjectionDecider = ({
     aliasList,
 }: {
     sharedRootPaths: string[];
-    aliasList: Record<string, string>;
+    aliasList: AliasList;
 }): ((filePath: string, content: string) => boolean) => {
     const sharedClosure = collectSharedClosure(sharedRootPaths, aliasList);
 
