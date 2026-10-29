@@ -7,6 +7,8 @@
 
 namespace SprykerShop\Yves\ShopUi;
 
+use Spryker\Client\Store\StoreClientInterface;
+use Spryker\Shared\Twig\TwigExtension;
 use Spryker\Shared\Twig\TwigFunctionProvider;
 use Spryker\Yves\Kernel\AbstractFactory;
 use SprykerShop\Yves\ShopUi\Dependency\Client\ShopUiToLocaleClientInterface;
@@ -33,10 +35,7 @@ use Twig\TwigFunction;
  */
 class ShopUiFactory extends AbstractFactory
 {
-    /**
-     * @return \Spryker\Shared\Twig\TwigExtension
-     */
-    public function createShopUiTwigExtension()
+    public function createShopUiTwigExtension(): TwigExtension
     {
         return new ShopUiTwigExtension(
             $this->getLocaleClient(),
@@ -50,6 +49,7 @@ class ShopUiFactory extends AbstractFactory
         return new AssetsUrlProvider(
             $this->getConfig(),
             $this->getTwigClient(),
+            $this->getStoreClient(),
         );
     }
 
@@ -88,6 +88,11 @@ class ShopUiFactory extends AbstractFactory
     public function getLocaleClient(): ShopUiToLocaleClientInterface
     {
         return $this->getProvidedDependency(ShopUiDependencyProvider::CLIENT_LOCALE);
+    }
+
+    public function getStoreClient(): StoreClientInterface
+    {
+        return $this->getProvidedDependency(ShopUiDependencyProvider::CLIENT_STORE);
     }
 
     public function getUtilNumberService(): ShopUiToUtilNumberServiceInterface

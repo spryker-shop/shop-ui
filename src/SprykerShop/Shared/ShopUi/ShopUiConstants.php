@@ -27,6 +27,16 @@ interface ShopUiConstants
 
     /**
      * Specification:
+     * - Returns the list of store names for which a dedicated asset namespace was built.
+     * - Used to resolve the %namespace% placeholder in YVES_ASSETS_URL_PATTERN: a store not in this list
+     *   never gets %namespace% substituted, so the asset URL always falls back to the pattern without it.
+     *
+     * @api
+     */
+    public const string YVES_ASSETS_NAMESPACES = 'SHOP_UI:YVES_ASSETS_NAMESPACES';
+
+    /**
+     * Specification:
      *  - Returns true if the store routing is enabled.
      *
      * @api

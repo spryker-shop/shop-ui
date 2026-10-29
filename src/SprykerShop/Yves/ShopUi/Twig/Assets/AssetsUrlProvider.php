@@ -7,41 +7,55 @@
 
 namespace SprykerShop\Yves\ShopUi\Twig\Assets;
 
+use Spryker\Client\Store\StoreClientInterface;
 use SprykerShop\Yves\ShopUi\Dependency\Client\ShopUiToTwigClientInterface;
 use SprykerShop\Yves\ShopUi\ShopUiConfig;
 
 class AssetsUrlProvider implements AssetsUrlProviderInterface
 {
-    /**
-     * @var string
-     */
-    protected const PLACEHOLDER_THEME = '%theme%';
+    protected const string PLACEHOLDER_THEME = '%theme%';
 
-    /**
-     * @var \SprykerShop\Yves\ShopUi\ShopUiConfig
-     */
-    protected $config;
+    protected const string PLACEHOLDER_NAMESPACE = '%namespace%';
 
-    /**
-     * @var \SprykerShop\Yves\ShopUi\Dependency\Client\ShopUiToTwigClientInterface
-     */
-    protected $twigClient;
+    protected ShopUiConfig $config;
+
+    protected ShopUiToTwigClientInterface $twigClient;
+
+    protected StoreClientInterface $storeClient;
 
     public function __construct(
         ShopUiConfig $config,
-        ShopUiToTwigClientInterface $twigClient
+        ShopUiToTwigClientInterface $twigClient,
+        StoreClientInterface $storeClient
     ) {
         $this->config = $config;
         $this->twigClient = $twigClient;
+        $this->storeClient = $storeClient;
     }
 
     public function getAssetsUrl(): string
     {
-        $yvesAssetsUrl = strtr($this->config->getYvesAssetsUrlPattern(), [
+        $yvesAssetsUrl = strtr($this->getNamespaceResolvedPattern(), [
             static::PLACEHOLDER_THEME => $this->getThemeName(),
         ]);
 
         return rtrim($yvesAssetsUrl, '/') . '/';
+    }
+
+    protected function getNamespaceResolvedPattern(): string
+    {
+        $pattern = $this->config->getYvesAssetsUrlPattern();
+
+        if (!str_contains($pattern, static::PLACEHOLDER_NAMESPACE)) {
+            return $pattern;
+        }
+
+        $storeName = $this->getStoreName();
+        if (in_array($storeName, $this->config->getYvesAssetsNamespaces(), true)) {
+            return strtr($pattern, [static::PLACEHOLDER_NAMESPACE => $storeName]);
+        }
+
+        return (string)preg_replace('#/?' . preg_quote(static::PLACEHOLDER_NAMESPACE, '#') . '/?#', '/', $pattern);
     }
 
     protected function getThemeName(): string
@@ -53,5 +67,10 @@ class AssetsUrlProvider implements AssetsUrlProviderInterface
         }
 
         return $themeName;
+    }
+
+    protected function getStoreName(): string
+    {
+        return $this->storeClient->getCurrentStore()->getNameOrFail();
     }
 }

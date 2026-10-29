@@ -47,10 +47,10 @@ class ShopUiConfig extends AbstractBundleConfig
      * Specification:
      * - Returns the path pattern to be used to build the path for Yves assets.
      * - When the path pattern contains the placeholder %theme% it will be replaced with the current theme name e.g. default.
+     * - When the path pattern contains the placeholder %namespace%, it is replaced with the current store name
+     *   when that store is listed in getYvesAssetsNamespaces(), otherwise the %namespace% path segment is removed.
      *
      * @api
-     *
-     * @return string
      */
     public function getYvesAssetsUrlPattern(): string
     {
@@ -58,9 +58,22 @@ class ShopUiConfig extends AbstractBundleConfig
     }
 
     /**
+     * Specification:
+     * - Returns the list of store names for which a dedicated asset namespace was built.
+     * - Used to resolve the %namespace% placeholder in getYvesAssetsUrlPattern(): a store not in this list
+     *   never gets %namespace% substituted, so the asset URL always falls back to the pattern without it.
+     *
      * @api
      *
-     * @return bool
+     * @return array<string>
+     */
+    public function getYvesAssetsNamespaces(): array
+    {
+        return $this->get(ShopUiConstants::YVES_ASSETS_NAMESPACES, []);
+    }
+
+    /**
+     * @api
      */
     public function isDevelopmentMode(): bool
     {
@@ -72,8 +85,6 @@ class ShopUiConfig extends AbstractBundleConfig
      * - Returns true if the store routing is enabled.
      *
      * @api
-     *
-     * @return bool
      */
     public function isStoreRoutingEnabled(): bool
     {
@@ -85,8 +96,6 @@ class ShopUiConfig extends AbstractBundleConfig
      * - Returns true when components should render `data-qa` test-automation attributes.
      *
      * @api
-     *
-     * @return bool
      */
     public function isQaAttributesEnabled(): bool
     {

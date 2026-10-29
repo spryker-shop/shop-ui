@@ -7,6 +7,7 @@
 
 namespace SprykerShop\Yves\ShopUi;
 
+use Spryker\Client\Store\StoreClientInterface;
 use Spryker\Yves\Kernel\AbstractBundleDependencyProvider;
 use Spryker\Yves\Kernel\Container;
 use SprykerShop\Yves\ShopUi\Dependency\Client\ShopUiToLocaleClientBridge;
@@ -34,6 +35,8 @@ class ShopUiDependencyProvider extends AbstractBundleDependencyProvider
      */
     public const CLIENT_LOCALE = 'CLIENT_LOCALE';
 
+    public const string CLIENT_STORE = 'CLIENT_STORE';
+
     /**
      * @var string
      */
@@ -46,6 +49,7 @@ class ShopUiDependencyProvider extends AbstractBundleDependencyProvider
         $container = $this->addUtilNumberService($container);
         $container = $this->addLocaleClient($container);
         $container = $this->addUtilSanitizeXssService($container);
+        $container = $this->addStoreClient($container);
 
         return $container;
     }
@@ -87,6 +91,15 @@ class ShopUiDependencyProvider extends AbstractBundleDependencyProvider
             return new ShopUiToUtilSanitizeXssServiceBridge(
                 $container->getLocator()->utilSanitizeXss()->service(),
             );
+        });
+
+        return $container;
+    }
+
+    protected function addStoreClient(Container $container): Container
+    {
+        $container->set(static::CLIENT_STORE, function (Container $container): StoreClientInterface {
+            return $container->getLocator()->store()->client();
         });
 
         return $container;
