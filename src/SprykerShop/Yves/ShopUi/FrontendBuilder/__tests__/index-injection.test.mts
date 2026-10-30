@@ -49,3 +49,83 @@ describe('cross-component mixin extension via the index (plan item 3)', () => {
         expect(css.indexOf('.button')).toBeLessThan(css.indexOf('.panel'));
     });
 });
+
+describe('a component loaded by another component contributes its definitions only', () => {
+    const definitionsViewPath = (relativePath: string): string => fixturePath('definitions-view', relativePath);
+    const defaultButtonPath = definitionsViewPath('Pyz/ShopUi/Theme/fixture/components/atoms/button/button.scss');
+
+    const createDefinitionsViewCompiler = async (componentStyleFilePaths: string[]) => {
+        const mixinIndex = await createMixinIndex({
+            componentStyleFilePaths,
+            sharedStyleFilePaths: [definitionsViewPath('core-shop-ui/Theme/fixture/styles/shared.scss')],
+        });
+
+        return createInjectionCompiler({ aliasList: shopUiAliasList('definitions-view'), mixinIndex });
+    };
+
+    const compileFixtureEntry = async (componentStyleFilePaths: string[], entryPath: string): Promise<string> => {
+        const { compileEntry } = await createDefinitionsViewCompiler(componentStyleFilePaths);
+        const result = await compileEntry(readFileSync(entryPath, 'utf8'), entryPath);
+
+        return result.css.toString();
+    };
+
+    const countOccurrences = (css: string, selector: string): number => css.split(selector).length - 1;
+
+    it('does not re-emit a self-emitting mixin owner into a consumer component through the mixin index', async () => {
+        const configuratorButtonPath = definitionsViewPath(
+            'Pyz/ConfigurableBundlePage/Theme/fixture/components/molecules/configurator-button/configurator-button.scss',
+        );
+
+        const css = await compileFixtureEntry([defaultButtonPath, configuratorButtonPath], configuratorButtonPath);
+
+        expect(css).toContain('.configurator-button');
+        expect(css).toContain('padding: 15px');
+        expect(css).not.toMatch(/(^|\s)\.button\s*\{/);
+    });
+
+    it('does not emit what the definitions view loads from its own directory', async () => {
+        const configuratorButtonPath = definitionsViewPath(
+            'Pyz/ConfigurableBundlePage/Theme/fixture/components/molecules/configurator-button/configurator-button.scss',
+        );
+
+        const css = await compileFixtureEntry([defaultButtonPath, configuratorButtonPath], configuratorButtonPath);
+
+        expect(css).not.toContain('.button__icon');
+    });
+
+    it('emits a custom theme override of a self-emitting default theme component exactly once', async () => {
+        const customButtonPath = definitionsViewPath('Pyz/ShopUi/Theme/custom/components/atoms/button/button.scss');
+
+        const css = await compileFixtureEntry([defaultButtonPath, customButtonPath], customButtonPath);
+
+        expect(countOccurrences(css, '.button {')).toBe(1);
+        expect(css).toContain('background-color: orange');
+    });
+
+    it('serves an explicit @use of another component and the injected owner as one module', async () => {
+        const cartButtonPath = definitionsViewPath(
+            'Pyz/CartPage/Theme/fixture/components/molecules/cart-button/cart-button.scss',
+        );
+
+        const css = await compileFixtureEntry([defaultButtonPath, cartButtonPath], cartButtonPath);
+
+        expect(css).toContain('.cart-button');
+        expect(css).not.toMatch(/(^|\s)\.button\s*\{/);
+    });
+
+    it('keeps emitting a self-emitting file that a sibling in its own directory loads', async () => {
+        const linkStylePath = definitionsViewPath('Pyz/ShopUi/Theme/fixture/components/atoms/link/style.scss');
+
+        const css = await compileFixtureEntry([], linkStylePath);
+
+        expect(css).toContain('.link');
+    });
+
+    it('still emits a self-emitting component compiled as its own entry', async () => {
+        const css = await compileFixtureEntry([defaultButtonPath], defaultButtonPath);
+
+        expect(countOccurrences(css, '.button {')).toBe(1);
+        expect(css).toContain('.button__icon');
+    });
+});

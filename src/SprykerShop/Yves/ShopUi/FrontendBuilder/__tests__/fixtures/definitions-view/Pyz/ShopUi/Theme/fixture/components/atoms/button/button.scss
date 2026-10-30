@@ -1,0 +1,11 @@
+@import 'button-icon';
+
+@mixin shop-ui-button($name: '.button') {
+    #{$name} {
+        color: $setting-color-main;
+
+        @content;
+    }
+}
+
+@include shop-ui-button;

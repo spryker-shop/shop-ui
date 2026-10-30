@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { buildDefinitionsView } from './definitions-view.mts';
 import { isExistingFile, resolveThroughAliasTargets, resolveWithSassConventions } from './sass-path-resolution.mts';
 import { createStyleFileInjectionDecider } from './style-module-context.mts';
 import type { MixinIndex } from './mixin-index.mts';
@@ -63,11 +64,15 @@ interface LoadResult {
 // `file:` URLs instead would hand relative resolution to the compiler's built-in filesystem
 // importer and bypass injection.
 const CANONICAL_SCHEME = 'spryker-yves';
+// A host, not a query: relative resolution keeps the host, so whatever a definitions view loads stays one.
+const DEFINITIONS_VIEW_HOST = 'definitions';
 
 const INJECTED_SASS_BUILTIN_MODULES = ['map', 'list', 'color', 'string', 'math', 'meta', 'selector'];
 
 const COMPONENT_PATH_PATTERN =
     /\/Theme\/[^/]+\/(?:components\/(?:atoms|molecules|organisms)|templates|views)\/[^/]+\/.+\.scss$/;
+const COMPONENT_DIRECTORY_PATTERN =
+    /^.*\/Theme\/[^/]+\/(?:components\/(?:atoms|molecules|organisms)|templates|views)\/[^/]+\//;
 const STYLES_PATH_PATTERN = /\/Theme\/[^/]+\/styles\//;
 // A non-partial file directly inside `Theme/<theme>/styles/` — `basic.scss`, `util.scss` and the
 // project equivalents. Nested files (`styles/helpers/`, `styles/settings/`, …) and Sass partials
@@ -219,11 +224,16 @@ export const createErrorTranslatingSassImplementation = (
     },
 });
 
-const canonicalUrlFromPath = (absolutePath: string): URL =>
-    new URL(`${CANONICAL_SCHEME}://${pathToFileURL(absolutePath).href.slice('file://'.length)}`);
+const canonicalUrlFromPath = (absolutePath: string, isDefinitionsView = false): URL =>
+    new URL(
+        `${CANONICAL_SCHEME}://${isDefinitionsView ? DEFINITIONS_VIEW_HOST : ''}` +
+            pathToFileURL(absolutePath).href.slice('file://'.length),
+    );
 
-const pathFromCanonicalUrl = (canonicalUrl: URL): string =>
-    fileURLToPath(new URL(`file://${canonicalUrl.href.slice(`${CANONICAL_SCHEME}://`.length)}`));
+const pathFromCanonicalUrl = (canonicalUrl: URL): string => fileURLToPath(new URL(`file://${canonicalUrl.pathname}`));
+
+const isDefinitionsViewUrl = (url: URL | null): boolean =>
+    url?.protocol === `${CANONICAL_SCHEME}:` && url.host === DEFINITIONS_VIEW_HOST;
 
 const pathFromContainingUrl = (containingUrl: URL | null): string | null => {
     if (!containingUrl) {
@@ -248,6 +258,29 @@ const declaresSassBuiltinModule = (content: string, moduleName: string): boolean
 // sass-loader `additionalData` root injection (entry files) must agree on it.
 export const isInjectableComponentPath = (filePath: string): boolean =>
     COMPONENT_PATH_PATTERN.test(filePath) && !STYLES_PATH_PATTERN.test(filePath);
+
+const componentDirectoryOf = (filePath: string): string | null =>
+    COMPONENT_DIRECTORY_PATTERN.exec(filePath)?.[0] ?? null;
+
+const isDefinitionsViewLoad = (
+    resolvedPath: string,
+    requestingFilePath: string | null,
+    isRequestFromDefinitionsView: boolean,
+): boolean => {
+    if (!isInjectableComponentPath(resolvedPath)) {
+        return false;
+    }
+
+    if (isRequestFromDefinitionsView) {
+        return true;
+    }
+
+    return (
+        requestingFilePath !== null &&
+        isInjectableComponentPath(requestingFilePath) &&
+        componentDirectoryOf(requestingFilePath) !== componentDirectoryOf(resolvedPath)
+    );
+};
 
 /**
  * Global style entry roots need the shared context too: a project that still writes them in the
@@ -349,12 +382,13 @@ export const createSassInjectionImporterFactory = ({
         ),
     ];
 
+    // Paths, not canonical URLs: canonicalize() must see the injecting file as `containingUrl`.
     const buildInjectionBanner = (content: string, canonicalPath: string): string => {
         return [
             ...sharedContextDeclarations(content),
             ...mixinIndex
                 .resolveDependencies(content, canonicalPath)
-                .map((ownerFilePath) => `@use '${canonicalUrlFromPath(ownerFilePath).href}' as *;`),
+                .map((ownerFilePath) => `@use '${ownerFilePath}' as *;`),
         ].join(' ');
     };
 
@@ -377,29 +411,26 @@ export const createSassInjectionImporterFactory = ({
             canonicalizeContext: { containingUrl: URL | null },
         ): Promise<URL | null> {
             // A URL already in the canonical scheme comes from relative resolution against a file
-            // this importer loaded; only the filesystem conventions remain to be applied.
+            // this importer loaded; only the filesystem conventions remain to be applied. Component
+            // files are declined: Sass retries with the raw URL and `containingUrl`, which decides the view.
             if (requestUrl.startsWith(`${CANONICAL_SCHEME}:`)) {
                 const requestedPath = pathFromCanonicalUrl(new URL(requestUrl));
                 const resolvedPath = resolveWithSassConventions(requestedPath, requestedPath);
 
-                return resolvedPath ? canonicalUrlFromPath(resolvedPath) : null;
+                return resolvedPath && !isInjectableComponentPath(resolvedPath)
+                    ? canonicalUrlFromPath(resolvedPath)
+                    : null;
             }
 
             // Relative loads from a compilation entry point arrive pre-resolved as `file:` URLs
-            // (the entry is compiled from a string and has no owning importer). Component-tree
-            // files must not fall through to the built-in filesystem importer — that would skip
-            // injection — so those are pulled into the canonical scheme here. Style-graph files come
-            // along too: `load()` decides per file whether they need the shared banner, and it can
-            // only decide for files it is asked to load.
+            // (the entry is compiled from a string and has no owning importer). Style-graph files come
+            // into the canonical scheme so `load()` can decide on the shared banner; component files
+            // are declined as above.
             if (requestUrl.startsWith('file:')) {
                 const requestedPath = fileURLToPath(new URL(requestUrl));
                 const resolvedPath = resolveWithSassConventions(requestedPath, requestedPath);
 
-                if (resolvedPath && (isInjectableComponentPath(resolvedPath) || isStyleGraphPath(resolvedPath))) {
-                    return canonicalUrlFromPath(resolvedPath);
-                }
-
-                return null;
+                return resolvedPath && isStyleGraphPath(resolvedPath) ? canonicalUrlFromPath(resolvedPath) : null;
             }
 
             // Remaining schemes (pkg:, data:) are not ours; sass-loader's webpack importer handles them.
@@ -410,6 +441,12 @@ export const createSassInjectionImporterFactory = ({
             // Legacy webpack-style tilde prefix; sass-loader's modern API no longer strips it, we own it.
             const request = requestUrl.startsWith('~') ? requestUrl.slice(1) : requestUrl;
             const requestingFilePath = pathFromContainingUrl(canonicalizeContext.containingUrl);
+            const isRequestFromDefinitionsView = isDefinitionsViewUrl(canonicalizeContext.containingUrl);
+            const canonicalUrlForRequest = (resolvedPath: string): URL =>
+                canonicalUrlFromPath(
+                    resolvedPath,
+                    isDefinitionsViewLoad(resolvedPath, requestingFilePath, isRequestFromDefinitionsView),
+                );
 
             // Canonical remap: every reference to the shared stylesheet resolves to the project
             // wrapper (when present), so project branding reaches all files consistently. The
@@ -424,13 +461,13 @@ export const createSassInjectionImporterFactory = ({
             const aliasResolvedPath = resolveAliasRequest(request, requestingFilePath, onCandidateMissing);
 
             if (aliasResolvedPath) {
-                return canonicalUrlFromPath(aliasResolvedPath);
+                return canonicalUrlForRequest(aliasResolvedPath);
             }
 
             if (request.startsWith('/')) {
                 const absoluteResolvedPath = resolveWithSassConventions(request, requestingFilePath);
 
-                return absoluteResolvedPath ? canonicalUrlFromPath(absoluteResolvedPath) : null;
+                return absoluteResolvedPath ? canonicalUrlForRequest(absoluteResolvedPath) : null;
             }
 
             if (requestingFilePath) {
@@ -440,7 +477,7 @@ export const createSassInjectionImporterFactory = ({
                 );
 
                 if (relativeResolvedPath) {
-                    return canonicalUrlFromPath(relativeResolvedPath);
+                    return canonicalUrlForRequest(relativeResolvedPath);
                 }
             }
 
@@ -490,16 +527,21 @@ export const createSassInjectionImporterFactory = ({
                 return { contents: `${styleBanner} ${content}`, syntax: 'scss', sourceMapUrl };
             }
 
-            const injectionBanner = buildInjectionBanner(content, canonicalPath);
+            const isDefinitionsView = isDefinitionsViewUrl(canonicalUrl);
+            const componentContent = isDefinitionsView ? buildDefinitionsView(content) : content;
+            const injectionBanner = buildInjectionBanner(componentContent, canonicalPath);
 
             if (isInjectionDebuggingEnabled) {
-                console.log(`[debug-injection] ${canonicalPath}\n    injected banner: ${injectionBanner}`);
+                console.log(
+                    `[debug-injection] ${canonicalPath}${isDefinitionsView ? ' (definitions view)' : ''}\n` +
+                        `    injected banner: ${injectionBanner}`,
+                );
             }
 
             // The banner is a single physical line prepended to the original first line, so
             // compiler error and warning line numbers keep matching the authored file.
             return {
-                contents: `${injectionBanner} ${content}`,
+                contents: `${injectionBanner} ${componentContent}`,
                 syntax: 'scss',
                 sourceMapUrl,
             };

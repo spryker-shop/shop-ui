@@ -1,0 +1,3 @@
+@use '../../../../../../ShopUi/Theme/fixture/components/atoms/button/button' as *;
+
+@include shop-ui-button('.cart-button');

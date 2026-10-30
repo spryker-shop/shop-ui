@@ -1,0 +1,7 @@
+@mixin configurable-bundle-page-configurator-button($name: '.configurator-button') {
+    @include shop-ui-button($name) {
+        padding: 15px;
+    }
+}
+
+@include configurable-bundle-page-configurator-button;
