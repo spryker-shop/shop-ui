@@ -1,7 +1,7 @@
 /* eslint-disable max-lines */
 import Component from '../../../models/component';
 import AjaxProvider from '../../../components/molecules/ajax-provider/ajax-provider';
-import debounce from 'lodash-es/debounce';
+import { debounce } from 'ShopUi/utils/timing/debounce';
 
 export enum Events {
     FETCHING = 'fetching',

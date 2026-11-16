@@ -1,8 +1,8 @@
 /* eslint-disable max-lines */
 import Component from '../../../models/component';
 import AjaxProvider from '../../../components/molecules/ajax-provider/ajax-provider';
-import debounce from 'lodash-es/debounce';
-import throttle from 'lodash-es/throttle';
+import { debounce } from 'ShopUi/utils/timing/debounce';
+import { throttle } from 'ShopUi/utils/timing/throttle';
 
 export interface SPRYKER_SEARCH_RESULTS {
     searchTerm: string;

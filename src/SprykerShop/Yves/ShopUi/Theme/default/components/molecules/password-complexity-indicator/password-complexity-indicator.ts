@@ -1,5 +1,5 @@
 import Component from 'ShopUi/models/component';
-import debounce from 'lodash-es/debounce';
+import { debounce } from 'ShopUi/utils/timing/debounce';
 import PasswordValidator from 'password-validator';
 
 enum ComplexityWeight {

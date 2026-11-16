@@ -1,8 +1,8 @@
 import { sep } from 'node:path';
 import type { Stats } from 'node:fs';
-import glob from 'fast-glob';
 import { watch } from 'chokidar';
 import type { FSWatcher } from 'chokidar';
+import { glob } from '../glob.mts';
 import type { TwigVersionHolder } from './manifest-writer.mts';
 
 // The plan calls for a ~100 ms debounce so a burst of editor writes (a single save can surface as
@@ -94,7 +94,7 @@ export interface TwigWatcherOptions {
 export const resolveThemeWatchDirectories = async (componentEntryPointDirectories: string[]): Promise<string[]> => {
     const resolvedModuleDirectorySets = await Promise.all(
         componentEntryPointDirectories.map((directoryPattern) =>
-            glob(directoryPattern, { onlyDirectories: true, absolute: true, unique: true }),
+            glob(directoryPattern, { onlyDirectories: true, absolute: true }),
         ),
     );
 
@@ -104,7 +104,6 @@ export const resolveThemeWatchDirectories = async (componentEntryPointDirectorie
                 cwd: moduleDirectory,
                 onlyDirectories: true,
                 absolute: true,
-                unique: true,
                 ignore: ['**/node_modules/**'],
             }),
         ),

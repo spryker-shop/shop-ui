@@ -1,6 +1,6 @@
 // Duplicated on purpose: the Gui and ShopUi FrontendBuilders each carry this file until they share a package.
 import { join } from 'node:path';
-import glob from 'fast-glob';
+import { glob } from '../glob.mts';
 import { dasherize, joinConfigurationPath, toConfigurationPathSegments } from '../typescript/configuration-path.mts';
 import type { AliasProvider, PathAliasMap, SourceRoots } from './alias-provider.mts';
 
@@ -63,7 +63,6 @@ const findSharedThemeDirectories = async (
             cwd: context,
             onlyDirectories: true,
             onlyFiles: false,
-            unique: true,
             followSymbolicLinks: false,
         })
     ).sort();

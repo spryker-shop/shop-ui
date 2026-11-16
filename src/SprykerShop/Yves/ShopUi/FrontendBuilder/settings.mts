@@ -1,7 +1,7 @@
 import { dirname, join, resolve } from 'node:path';
 import { readFileSync, existsSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
-import glob from 'fast-glob';
+import { globSync } from './libs/glob.mts';
 import type { BuildHook } from './libs/webpack/build-hooks.mts';
 import type { NamespaceConfig } from './libs/sass/namespace-config-parser.mts';
 import type { FindSettings } from './libs/webpack/finder.mts';
@@ -184,7 +184,7 @@ const buildGeneratedSources = (context: string, generated: GeneratedBuildConfigu
 // The ShopUi package directory is `ShopUi` in the monorepo and `shop-ui` under vendor/.
 const resolveGeneratedCoreThemeRoot = (context: string): string => {
     const pattern = `${resolveNamespaceDirectory(context, SHOP_UI_HOME_NAMESPACE).replace(/^\.\//, '')}/*/src/SprykerShop/Yves/ShopUi/Theme`;
-    const matches = glob.sync(pattern, { cwd: context, onlyDirectories: true }).sort();
+    const matches = globSync(pattern, { cwd: context, onlyDirectories: true }).sort();
 
     if (matches.length !== 1) {
         throw new Error(

@@ -85,18 +85,19 @@ describe('finder tier ordering under adversarial glob completion order (async pi
         const fixtureRoot = fixturePath('finder-ordering');
         const adversarialReaddirDelayMilliseconds = 40;
 
-        // fast-glob accepts a custom filesystem adapter through the glob settings; missing members
-        // fall back to fast-glob's defaults. Delaying readdir only for the first dirs entry (z-tier)
+        // tinyglobby accepts a custom filesystem adapter through the glob settings; missing members
+        // fall back to the node:fs defaults. Delaying readdir only for the first dirs entry (z-tier)
         // makes that tier the last to finish its directory reads, so a completion-order accumulator
         // would emit it after the second tier. The authored tier order must survive.
         const delayedFileSystemAdapter = {
-            // fast-glob's readdir is a Node-style callback with several overloads; forwarding the
-            // arguments verbatim across this third-party boundary is the one place `any` is needed.
-            readdir: (...readdirArguments: any[]): void => {
+            // The crawler's readdir is a Node-style callback with several overloads; forwarding the
+            // arguments verbatim across this third-party boundary is the one place `any` is needed. The adapter
+            // type is `typeof readdir`, whose `__promisify__` member the crawler never calls.
+            readdir: ((...readdirArguments: any[]): void => {
                 const directoryPath = String(readdirArguments[0]);
                 const delayMilliseconds = directoryPath.includes('z-tier') ? adversarialReaddirDelayMilliseconds : 0;
                 setTimeout(() => (realReaddir as (...args: any[]) => void)(...readdirArguments), delayMilliseconds);
-            },
+            }) as typeof realReaddir,
         };
 
         const files = await findComponentStyles({

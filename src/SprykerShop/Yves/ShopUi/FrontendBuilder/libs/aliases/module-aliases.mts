@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
-import glob from 'fast-glob';
 import { isYvesLayerRoot } from '../../settings.mts';
+import { glob } from '../glob.mts';
 import { joinConfigurationPath, toConfigurationPathSegments } from '../typescript/configuration-path.mts';
 import type { AliasProvider, PathAliasMap, SourceRoots } from './alias-provider.mts';
 

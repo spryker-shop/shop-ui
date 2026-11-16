@@ -12,7 +12,7 @@
 
 import { join, sep } from 'node:path';
 import { existsSync } from 'node:fs';
-import glob from 'fast-glob';
+import { globSync } from '../glob.mts';
 import type { AppSettings } from '../../settings.mts';
 
 // Local token shape instead of style-dictionary's own type exports: the step must keep working
@@ -77,7 +77,7 @@ const registerTransforms = (StyleDictionary: StyleDictionaryModule): void => {
 const resolveStylesBuildPath = (appSettings: AppSettings): string => {
     const [projectSourcesDirectory] = appSettings.find.shopUiEntryPoints.dirs;
     const stylesPattern = join(projectSourcesDirectory, `ShopUi/Theme/${appSettings.theme}/styles`);
-    const [resolvedDirectory] = glob.sync(stylesPattern, { onlyDirectories: true, absolute: true, unique: true });
+    const [resolvedDirectory] = globSync(stylesPattern, { onlyDirectories: true, absolute: true });
 
     return `${resolvedDirectory ?? stylesPattern}${sep}`;
 };

@@ -1,15 +1,15 @@
 import { dirname, basename } from 'node:path';
-import glob from 'fast-glob';
+import { glob } from '../glob.mts';
+import type { GlobOptions } from '../glob.mts';
 
 export interface FindSettings {
     dirs: string[];
     patterns: string[];
     fallbackPatterns?: string[];
-    globSettings?: Record<string, unknown>;
+    globSettings?: GlobOptions;
 }
 
-const defaultGlobSettings = {
-    followSymlinkedDirectories: false,
+const defaultGlobSettings: GlobOptions = {
     absolute: true,
     onlyFiles: true,
     onlyDirectories: false,
@@ -17,12 +17,12 @@ const defaultGlobSettings = {
 
 const globAsync = async (
     patterns: string | string[],
-    rootConfiguration: Record<string, unknown>,
+    rootConfiguration: GlobOptions,
 ): Promise<string[] | undefined> => {
     try {
         const files = await glob(patterns, rootConfiguration);
 
-        // fast-glob returns matches in the filesystem's readdir order, which is not stable across
+        // The glob returns matches in the filesystem's readdir order, which is not stable across
         // machines or runs. Sort lexicographically so entry/style discovery is deterministic.
         return files.sort();
     } catch (error) {
@@ -33,7 +33,7 @@ const globAsync = async (
 const resolveDirs = async (globDirs: string[]): Promise<string[]> => {
     const sets = await Promise.all(
         globDirs.map(async (dir) => {
-            const dirs = await glob(dir, { onlyDirectories: true, absolute: true, unique: true });
+            const dirs = await glob(dir, { onlyDirectories: true, absolute: true });
 
             // Sort within each per-pattern expansion so directory discovery is deterministic. The
             // concatenation below keeps the authored tier order across globDirs entries intact, so
@@ -51,7 +51,7 @@ const resolveDirs = async (globDirs: string[]): Promise<string[]> => {
 const findFiles = (
     globDirs: string[],
     globPatterns: string[],
-    globSettings: Record<string, unknown> | undefined,
+    globSettings: GlobOptions | undefined,
 ): Promise<string[]> =>
     (async () => {
         const resolvedDirs = await resolveDirs(globDirs);
@@ -66,7 +66,7 @@ const findFiles = (
             const results = await resultsPromise;
             const globPath = await globAsync(globPatterns, rootConfiguration);
 
-            // globAsync returns undefined only when fast-glob threw (already logged); concat keeps
+            // globAsync returns undefined only when the glob threw (already logged); concat keeps
             // the original behaviour of appending that value rather than short-circuiting.
             return results.concat(globPath as string[]);
         }, Promise.resolve<string[]>([]));
@@ -76,7 +76,7 @@ const find = async (
     globDirs: string[],
     globPatterns: string[],
     globFallbackPatterns: string[],
-    globSettings: Record<string, unknown> = {},
+    globSettings: GlobOptions = {},
 ): Promise<string[]> => {
     const customThemeFiles = await findFiles(globDirs, globPatterns, globSettings);
     const defaultThemeFiles = globFallbackPatterns.length
