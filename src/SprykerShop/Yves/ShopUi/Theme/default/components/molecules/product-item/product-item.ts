@@ -128,6 +128,15 @@ export default class ProductItem extends Component {
             details[key] = data[key];
         }
 
+        // A swatch switches the card to another abstract product: its concrete product is unknown, and its name is the abstract name.
+        if ('concreteSku' in details) {
+            details.concreteSku = '';
+        }
+
+        if ('abstractName' in details) {
+            details.abstractName = data.name ?? '';
+        }
+
         this.setAttribute('details', JSON.stringify(details));
     }
 

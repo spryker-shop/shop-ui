@@ -1,0 +1,22 @@
+{#-
+ # Tracking details
+ #
+ # Outputs the `tracking-details` attribute value the traceable events read from an element: the product data as JSON.
+ # The template passes the fields of its own data as `product`, e.g. { sku, abstractSku, name, abstractName, price, quantity }; prices are in cents.
+ # It adds what every tracked product shares: it outputs nothing while the storefront does not track user actions
+ # (the traceable event widget is not registered or the visitor turned the tracking off), and it drops the price for a visitor who may not see prices.
+ #
+ # Usage:
+ #   {% set trackingDetails %}{% include model('tracking-details') ignore missing with { product: { sku: item.sku, price: item.unitPrice, quantity: item.quantity } } only %}{% endset %}
+ #   <div{% if trackingDetails %} tracking-details="{{ trackingDetails }}"{% endif %}>
+ #
+ # A module that supports a ShopUi version without this template includes it with `ignore missing`: the element then has no tracking details.
+ # The output is already escaped for an HTML attribute.
+ -#}
+
+{%- set isUserActionTrackingEnabled = findWidget('TraceableEventWidget').parameters.isUserActionTrackingEnabled ?? false -%}
+{%- if isUserActionTrackingEnabled -%}
+    {{- product | merge({
+        price: can('SeePricePermissionPlugin') ? (product.price ?? null) : null,
+    }) | json_encode -}}
+{%- endif -%}

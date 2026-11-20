@@ -137,6 +137,10 @@
             {% widget 'CurrencyIsoCodeWidget' only %}{% endwidget %}
         {% endset %}
 
+        {# Add to cart is listed before the product click: a click on a product card's add-to-cart button would otherwise count as a click on the card.
+           The triggers are the clicked buttons themselves, not focused ones: Safari and Firefox on macOS do not focus a button on click.
+           A product card click sends the list the card belongs to and its position in it, as the item list view tracker writes them, so it matches the list view.
+           The item list view tracker reports every view with its own products, so none of them is debounced. #}
         {% set events = {
             list: [
                 {
@@ -144,11 +148,64 @@
                     name: 'load',
                 },
                 {
+                    event: 'ITEM_LIST_VIEW',
+                    name: 'item-list-view',
+                    debounce: false,
+                },
+                {
+                    event: 'ADD_TO_CART',
+                    name: 'click',
+                    triggers: [
+                        {
+                            selector: '.js-product-item .js-ajax-add-to-cart__button',
+                            groupAs: {
+                                key: 'products',
+                                toArray: true,
+                            },
+                            data: {
+                                details: {
+                                    selector: '.js-product-item',
+                                    closest: true,
+                                    attribute: 'details',
+                                    flatten: true,
+                                },
+                            },
+                        },
+                        {
+                            selector: '.js-product-item__button-add-to-cart',
+                            groupAs: {
+                                key: 'products',
+                                toArray: true,
+                            },
+                            data: {
+                                details: {
+                                    selector: '.js-product-item',
+                                    closest: true,
+                                    attribute: 'details',
+                                    flatten: true,
+                                },
+                                quantity: {
+                                    value: 1,
+                                },
+                            },
+                        },
+                        {
+                            selector: '.product-set-cms-content [tracking-products]',
+                            data: {
+                                products: {
+                                    selector: 'self',
+                                    attribute: 'tracking-products',
+                                },
+                            },
+                        },
+                    ],
+                },
+                {
                     event: 'PRODUCT_CLICK',
                     name: 'click',
                     triggers: [
                         {
-                            selector: '.js-product-item:not(:has(.js-ajax-add-to-cart__button:focus))',
+                            selector: '.js-product-item',
                             groupAs: {
                                 key: 'products',
                                 toArray: true,
@@ -157,6 +214,20 @@
                                 details: {
                                     selector: 'self',
                                     flatten: true,
+                                },
+                                itemListId: {
+                                    selector: '[data-item-list-id]',
+                                    closest: true,
+                                    attribute: 'data-item-list-id',
+                                },
+                                itemListName: {
+                                    selector: '[data-item-list-id]',
+                                    closest: true,
+                                    attribute: 'data-item-list-name',
+                                },
+                                index: {
+                                    selector: 'self',
+                                    attribute: 'data-item-list-index',
                                 },
                             },
                         },
@@ -178,33 +249,28 @@
                     ],
                 },
                 {
-                    event: 'ADD_TO_CART',
+                    event: 'SEARCH_EVENT',
+                    name: 'search-results',
+                },
+                {
+                    event: 'CHECKOUT_START',
                     name: 'click',
                     triggers: [
                         {
-                            selector: '.js-product-item:has(.js-ajax-add-to-cart__button:focus)',
-                            groupAs: {
-                                key: 'products',
-                                toArray: true,
-                            },
-                            data: {
-                                details: {
-                                    selector: 'self',
-                                    flatten: true,
-                                },
-                            },
+                            selector: 'a[href$="/checkout"]',
                         },
                     ],
                 },
-                {
-                    event: 'SEARCH_EVENT',
-                    name: 'search-results',
-                }
             ],
             data: {
                 currency: currency | spaceless,
             },
         } %}
+
+        {# Reports the product cards seen in lists marked with data-item-list-id, e.g. similar products, as the item-list-view event, and writes each card's position to data-item-list-index, which a product card click sends as `index`. #}
+        {% if findWidget('TraceableEventWidget').parameters.isUserActionTrackingEnabled ?? false %}
+            {% include molecule('traceable-item-list-view-tracker', 'TraceableEventWidget') ignore missing only %}
+        {% endif %}
 
         {% block eventTracker %}
             {% widget 'TraceableEventWidget' with {

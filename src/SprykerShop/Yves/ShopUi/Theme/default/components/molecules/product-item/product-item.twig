@@ -17,22 +17,43 @@
     metaSku: data.product.sku is defined ? data.product.sku : (data.product.abstract_sku is defined ? data.product.abstract_sku : ''),
     abstractSku: data.product.abstractSku is defined ? data.product.abstractSku : (data.product.abstract_sku is defined ? data.product.abstract_sku : ''),
     eventRevealer: null,
+    isTracked: true,
 } %}
 
 {% set image = data.product.images[0] ?? null %}
 {% set imageAltText = image.alt_text_small ?? image.altTextSmall ?? data.imageAlt %}
 
+{# Always output: the card reads its own details too, e.g. the search ID of its product link. #}
+{% set productDetails = {
+    sku: data.product.add_to_cart_sku
+        | default((data.product.attributeMap is defined and data.product.attributeMap ? data.product.attributeMap.productConcreteIds | keys | first)
+        | default(data.metaSku)),
+    searchId: data.product.searchQueryId | default,
+    position: data.product.position | default(0),
+    price: can('SeePricePermissionPlugin') ? data.product.prices.DEFAULT | default : null,
+} %}
+
+{# The tracking fields, only while user actions are tracked. A card of a concrete product reports its own SKU, variant and abstract product;
+   a card of an abstract product reports its only variant, if it has one, and falls back to its own SKU as the abstract SKU.
+   Brand and categories come from a product view the storage client expanded; a list of search results renders the
+   ProductTrackingDetailsWidget once instead, and the traceable events fill the empty values from it. #}
+{% if data.isTracked and (findWidget('TraceableEventWidget').parameters.isUserActionTrackingEnabled ?? false) %}
+    {% set isConcreteProductCard = data.product.idProductConcrete | default(null) is not empty %}
+    {% set productDetails = productDetails | merge({
+        abstractSku: (data.abstractSku ?: (isConcreteProductCard ? '' : data.metaSku)) | default(null),
+        concreteSku: isConcreteProductCard ? data.product.sku | default('') : data.product.add_to_cart_sku | default(''),
+        name: data.name,
+        abstractName: isConcreteProductCard ? data.product.abstractName | default(null) : data.name,
+        brand: data.product.brand | default(null),
+        variant: isConcreteProductCard ? data.product.selectedVariantAttributes | default([]) | reduce((values, value) => values | merge([value]), []) : [],
+        categories: (data.product.categoryPath ?? []) | map(categoryName => { name: categoryName }),
+    }) %}
+{% endif %}
+
 {% define attributes = {
     itemscope: '',
     itemtype: 'https://schema.org/Product',
-    details: {
-        sku: data.product.add_to_cart_sku
-            | default((data.product.attributeMap is defined and data.product.attributeMap ? data.product.attributeMap.productConcreteIds | keys | first)
-            | default(data.metaSku)),
-        searchId: data.product.searchQueryId | default,
-        position: data.product.position | default(0),
-        price: can('SeePricePermissionPlugin') ? data.product.prices.DEFAULT | default : null,
-    } | json_encode,
+    details: productDetails | json_encode,
 } %}
 
 {% import _self as macros %}
